@@ -2,20 +2,29 @@ import type { Game } from '../domain/game';
 import type { WishlistSource } from '../ports/WishlistSource';
 
 /**
- * Fetches the wishlist and prices from Steam through the Lambda proxy at `/api/*`
- * (Steam sends no CORS headers, so the browser can't call it directly).
+ * Fetches the wishlist with prices from Steam through `/api/*`: the Vite dev proxy
+ * locally (WireMock or Steam, see STEAM_API_URL), CloudFront in production.
+ * Steam sends no CORS headers, so the browser can't call it directly.
  *
  * TODO(Toby): implement getWishlist.
- * - Wishlist: IWishlistService/GetWishlist/v1?steamid=... gives app IDs and priority.
- *   Turn priority into `rank` (1 = top).
- * - Prices: store appdetails with cc=gb&filters=price_overview gives `final` (pence),
- *   `initial` (pence) and `discount_percent`. It's rate limited, so batch and cache.
- * - Names: price_overview doesn't include the name. Get it from another request or from
- *   the proxy.
- * - Skip games with no price_overview (unreleased or delisted). Keep free games as
- *   price 0.
- * - Map failures to WishlistError: private wishlist → 'private', unknown account →
- *   'invalid-id', network errors, 5xx or 429 → 'unavailable'.
+ * - One request: GET {baseUrl}/IWishlistService/GetWishlistSortedFiltered/v1/?input_json=
+ *     {"steamid":"…","context":{"language":"english","country_code":"GB"},
+ *      "data_request":{},"start_index":0,"page_size":500}
+ *   (encodeURIComponent the JSON once).
+ * - Paging: if a page comes back with page_size items, fetch the next with
+ *   start_index += page_size.
+ * - rank = position in the response + 1 (Steam's own "Your rank" order). Don't use
+ *   `priority`: it has gaps, is 0 for games never ranked, and disagrees with Steam's order.
+ * - Map each item's store_item to Game. Don't filter anything out:
+ *     name            ← store_item.name
+ *     price           ← Number(best_purchase_option.final_price_in_cents), or 0 if absent
+ *     originalPrice   ← Number(best_purchase_option.original_price_in_cents), or 0 if absent
+ *     discountPercent ← best_purchase_option.discount_pct ?? 0
+ *     isFree          ← store_item.is_free === true
+ *     isComingSoon    ← store_item.is_coming_soon === true
+ * - Errors → WishlistError: check res.ok before res.json() (a bad ID or bad input_json
+ *   returns 400 HTML) → 'invalid-id'; an empty {"response":{}} → 'private' (or return []
+ *   if you'd rather treat it as empty); network errors, 5xx and 429 → 'unavailable'.
  */
 export class SteamProxyWishlistSource implements WishlistSource {
   private readonly baseUrl: string;

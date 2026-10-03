@@ -3,8 +3,9 @@ import type { Game } from '../domain/game';
 /** Outbound port: where the app gets a user's priced wishlist from. */
 export interface WishlistSource {
   /**
-   * Every wishlist game that has a price, with current GB prices in pence.
-   * Free games (price 0) are included; unpriced games (unreleased, delisted) are not.
+   * Every game on the wishlist, unfiltered, in Steam's rank order (rank 1 = top), with
+   * current GB prices in pence. Free and coming-soon games are included and flagged
+   * (isFree, isComingSoon); the domain decides what can go in a basket.
    * Rejects with a WishlistError when the cause is known.
    */
   getWishlist(steamId: string): Promise<Game[]>;

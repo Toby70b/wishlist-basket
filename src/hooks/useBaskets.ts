@@ -1,30 +1,24 @@
-import type { Basket } from '../domain/basket';
+import { useMemo } from 'react';
 import type { Game } from '../domain/game';
+import { planBaskets, type BasketPlan } from '../application/planBaskets';
 
-export type UseBasketsResult = {
-  baskets: Basket[];
+export type UseBasketsResult = BasketPlan & {
   isComputing: boolean;
 };
 
+const NO_GAMES: Game[] = [];
+
 /**
- * Best baskets of games affordable within maxBudget.
+ * Thin React wrapper around planBaskets. All the logic lives in application/ and domain/.
+ * Recomputes only when the games or budget change.
  *
- * TODO(Toby): implement.
- * - `games` is the full wishlist minus anything the user excluded (the UI filters
- *   exclusions). It still includes free games: drop those and anything over budget
- *   before running findBaskets.
- * - maxBudget is pence. The UI passes the budget the user submitted, and weight is a
- *   fixed 0.5 until the ranking slider returns.
- * - Recompute only when games, maxBudget or weight change. The UI passes stable
- *   references (memoised), so a useMemo/useEffect keyed on them is enough.
- * - Return baskets sorted best first; the UI shows the first 20.
- * - Fill Basket.breakdown with each game's points.
- * - While isComputing is true, keep returning the previous baskets if you can.
- *   The UI also keeps the last result itself if it gets an empty list mid-computation.
+ * isComputing is always false while planBaskets runs synchronously. If findBaskets
+ * gets slow enough to block typing, move it into a Web Worker and set isComputing
+ * while it runs. Keep returning the previous plan until the new one arrives, so the
+ * UI never flashes an empty list.
  */
-export function useBaskets(games: Game[], maxBudget: number, weight: number): UseBasketsResult {
-  void games;
-  void maxBudget;
-  void weight;
-  return { baskets: [], isComputing: false };
+export function useBaskets(games: Game[] | undefined, budget: number): UseBasketsResult {
+  const list = games ?? NO_GAMES;
+  const plan = useMemo(() => planBaskets(list, budget), [list, budget]);
+  return { ...plan, isComputing: false };
 }

@@ -1,4 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import type { Game } from '../domain/game';
+import { loadWishlist } from '../application/loadWishlist';
+import { WishlistError } from '../ports/WishlistSource';
+import { useWishlistSource } from './WishlistSourceContext';
 
 export type UseWishlistResult = {
   games: Game[] | undefined;
@@ -6,24 +10,33 @@ export type UseWishlistResult = {
   error: Error | null;
 };
 
+const MAX_RETRIES = 2;
+
+/** Retrying can't fix a private wishlist or a bad ID; only retry when Steam may recover. */
+function shouldRetry(failureCount: number, error: Error): boolean {
+  if (error instanceof WishlistError && error.kind !== 'unavailable') return false;
+  return failureCount < MAX_RETRIES;
+}
+
 /**
  * Loads the wishlist (with current GB prices) for a Steam ID.
+ * Thin wrapper: the logic lives in application/loadWishlist.ts, and the adapter comes
+ * from context.
  *
- * TODO(Toby): implement.
- * - Get the WishlistSource from React context (never import an adapter here).
- * - Use TanStack Query, keyed by steamId, so it fetches once per Steam ID.
- *   Changing only the budget re-submits the same ID and must not refetch.
- * - steamId === '' means "nothing entered yet": stay idle (`enabled: !!steamId`) and
- *   return { games: undefined, isLoading: false, error: null }.
- * - Errors: the UI picks its message from an optional `kind` on the error:
- *     'private'     → wishlist isn't public
- *     'invalid-id'  → no such Steam account
- *     'unavailable' → Steam / proxy down or rate limited
- *   Anything else falls back to error.message.
- * - Free games (price 0) should still be returned; the UI lists them separately.
- * - Games with no price (unreleased, delisted) should already be dropped by the adapter.
+ * Fetches once per Steam ID: re-submitting the same ID with a new budget hits the cache.
+ * steamId === '' means nothing has been entered yet, so the query stays idle.
  */
 export function useWishlist(steamId: string): UseWishlistResult {
-  void steamId;
-  return { games: undefined, isLoading: false, error: null };
+  const source = useWishlistSource();
+
+  const query = useQuery({
+    queryKey: ['wishlist', steamId],
+    queryFn: () => loadWishlist(source, steamId),
+    enabled: steamId !== '',
+    retry: shouldRetry,
+  });
+
+  // isLoading, not isPending: a disabled query is "pending" forever, which would show
+  // a spinner before any ID is entered.
+  return { games: query.data, isLoading: query.isLoading, error: query.error };
 }
