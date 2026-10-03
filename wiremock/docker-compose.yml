@@ -1,0 +1,11 @@
+# Stand-in for api.steampowered.com during development.
+# Start: npm run mock   (needs Docker Desktop running)
+services:
+  wiremock:
+    image: wiremock/wiremock:3.13.1
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./mappings:/home/wiremock/mappings
+      - ./__files:/home/wiremock/__files
+    command: ["--verbose"]

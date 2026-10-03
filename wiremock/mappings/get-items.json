@@ -1,0 +1,24 @@
+{
+  "mappings": [
+    {
+      "name": "GetItems: names and GB prices for every game on the recorded wishlist",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPath": "/IStoreBrowseService/GetItems/v1/",
+        "queryParameters": { "input_json": { "matches": ".+" } }
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json; charset=UTF-8" },
+        "bodyFileName": "steam/GetItems.json"
+      }
+    },
+    {
+      "name": "GetItems: POST is not allowed (matches real Steam)",
+      "priority": 5,
+      "request": { "method": "POST", "urlPath": "/IStoreBrowseService/GetItems/v1/" },
+      "response": { "status": 405 }
+    }
+  ]
+}

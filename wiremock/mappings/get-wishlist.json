@@ -1,0 +1,46 @@
+{
+  "mappings": [
+    {
+      "name": "GetWishlist: bad ID → Steam's 400 HTML page",
+      "priority": 1,
+      "request": {
+        "method": "GET",
+        "urlPath": "/IWishlistService/GetWishlist/v1/",
+        "queryParameters": { "steamid": { "doesNotMatch": "^\\d{17}$" } }
+      },
+      "response": {
+        "status": 400,
+        "headers": { "Content-Type": "text/html; charset=UTF-8" },
+        "body": "<html><head><title>Bad Request</title></head><body><h1>Bad Request</h1>Missing required routing parameter</body></html>"
+      }
+    },
+    {
+      "name": "GetWishlist: Toby's real wishlist (173 games, recorded 2026-10-03)",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPath": "/IWishlistService/GetWishlist/v1/",
+        "queryParameters": { "steamid": { "equalTo": "76561198045206229" } }
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json; charset=UTF-8" },
+        "bodyFileName": "steam/GetWishlist.json"
+      }
+    },
+    {
+      "name": "GetWishlist: any other valid ID → private or empty wishlist",
+      "priority": 10,
+      "request": {
+        "method": "GET",
+        "urlPath": "/IWishlistService/GetWishlist/v1/",
+        "queryParameters": { "steamid": { "matches": "^\\d{17}$" } }
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json; charset=UTF-8" },
+        "jsonBody": { "response": {} }
+      }
+    }
+  ]
+}
