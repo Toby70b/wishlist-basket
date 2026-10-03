@@ -2,7 +2,7 @@
 # Start: npm run mock   (needs Docker Desktop running)
 services:
   wiremock:
-    image: wiremock/wiremock:3.13.1
+    image: wiremock/wiremock:3x-alpine
     ports:
       - "8080:8080"
     volumes:
