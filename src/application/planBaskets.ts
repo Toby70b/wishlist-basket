@@ -1,12 +1,13 @@
 import type { Basket } from '../domain/basket';
-import { isBuyable, type Game } from '../domain/game';
+import { isBasketCandidate, type Game } from '../domain/game';
 import { findBaskets } from '../domain/findBaskets';
+import {RankScoring} from "../domain/scoring.ts";
 
 export const TOP_N = 20;
 
 export type BasketPlan = {
   baskets: Basket[]; // best first, at most TOP_N
-  cheapestPrice: number | null; // cheapest buyable game; null if there are none
+  cheapestPrice: number | null; // cheapest basket candidate; null if there are none
 };
 
 /**
@@ -19,12 +20,19 @@ export function planBaskets(games: readonly Game[], budget: number): BasketPlan 
   // N for scoring is the whole wishlist, so points don't shift with the budget.
   const wishlistSize = games.length;
 
-  const buyable = games.filter(isBuyable);
+  const rankScoring  = new RankScoring(wishlistSize);
 
-  const cheapestPrice = buyable.length ? Math.min(...buyable.map((g) => g.price)) : null;
+  // Buyable and costs money. Free-to-claim games are added to every basket instead.
+  const candidates = games.filter(isBasketCandidate);
 
-  const affordable = buyable.filter((g) => g.price <= budget);
-  const baskets = affordable.length ? findBaskets(affordable, budget).slice(0, TOP_N) : [];
+  const cheapestPrice = candidates.length ? Math.min(...candidates.map((g) => g.price)) : null;
+
+  const affordableGames = candidates.filter((g) => g.price <= budget);
+
+  const rankedAffordable = affordableGames.map(game => rankScoring.score(game));
+
+  const baskets = affordableGames.length ? findBaskets(rankedAffordable, budget).slice(0, TOP_N) : [];
+
 
   return { baskets, cheapestPrice };
 }

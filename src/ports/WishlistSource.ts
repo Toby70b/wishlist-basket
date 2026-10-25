@@ -5,7 +5,8 @@ export interface WishlistSource {
   /**
    * Every game on the wishlist, unfiltered, in Steam's rank order (rank 1 = top), with
    * current GB prices in pence. Free and coming-soon games are included and flagged
-   * (isFree, isComingSoon); the domain decides what can go in a basket.
+   * (isFree, isComingSoon); coming-soon games keep their price if they can be pre-ordered.
+   * The domain decides what can go in a basket.
    * Rejects with a WishlistError when the cause is known.
    */
   getWishlist(steamId: string): Promise<Game[]>;

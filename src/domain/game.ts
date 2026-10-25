@@ -1,20 +1,30 @@
 export type Game = {
   appId: number;
   name: string;
-  price: number; // final price in pence, after any current discount; 0 if Steam gives no price
-  originalPrice: number; // pence, before discount; 0 if Steam gives no price
+  // Pence, after any current discount. null when Steam offers no way to buy it
+  // (free to play, or unreleased and not available to pre-order).
+  price: number | null;
+  originalPrice: number | null; // pence, before discount; null whenever price is null
   discountPercent: number; // 0–100
   rank: number; // wishlist position, 1 = top
-  isFree: boolean; // free to play (Steam's is_free); has no price
-  isComingSoon: boolean; // not released yet; has no price
+  isFree: boolean; // free to play (Steam's is_free). Needed because these have no price
+  isComingSoon: boolean; // not released yet; has a price only if it can be pre-ordered
 };
 
-/** Can go in a basket: released and costs something. */
-export function isBuyable(game: Game): boolean {
-  return !game.isFree && !game.isComingSoon && game.price > 0;
+/** A game Steam will sell: price and originalPrice are definitely numbers. */
+export type PricedGame = Game & { price: number; originalPrice: number };
+
+/** Steam will sell it to you: paid, discounted, 100% off, or pre-order. */
+export function isBuyable(game: Game): game is PricedGame {
+  return game.price !== null;
 }
 
-/** Can be had for nothing right now: free to play, or a paid game at 100% off. */
+/** Costs nothing: free to play, or a buyable game at 100% off. */
 export function isFreeToClaim(game: Game): boolean {
-  return !game.isComingSoon && (game.isFree || game.price === 0);
+  return game.isFree || game.price === 0;
+}
+
+/** Goes into findBaskets: you can buy it and it costs money. */
+export function isBasketCandidate(game: Game): game is PricedGame {
+  return isBuyable(game) && !isFreeToClaim(game);
 }

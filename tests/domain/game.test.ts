@@ -1,35 +1,33 @@
 import { describe, expect, it } from 'vitest';
-import { isBuyable, isFreeToClaim } from '../../src/domain/game';
-import { makeComingSoonGame, makeFreeGame, makeGame } from '../fixtures/games';
+import { isBasketCandidate, isBuyable, isFreeToClaim, type Game } from '../../src/domain/game';
+import { makeComingSoonGame, makeFreeGame, makeGame, makeGiveawayGame, makePreOrderGame } from '../fixtures/games';
 
-const giveaway = makeGame({ price: 0, originalPrice: 1999, discountPercent: 100 });
+// Every kind of game Steam can return, and how each rule should treat it.
+const cases: [string, Game, { buyable: boolean; freeToClaim: boolean; candidate: boolean }][] = [
+  ['a normal paid game', makeGame({ price: 1499 }), { buyable: true, freeToClaim: false, candidate: true }],
+  ['a discounted game', makeGame({ price: 750, originalPrice: 1499, discountPercent: 50 }), { buyable: true, freeToClaim: false, candidate: true }],
+  ['a pre-order', makePreOrderGame(), { buyable: true, freeToClaim: false, candidate: true }],
+  ['a 100%-off giveaway', makeGiveawayGame(), { buyable: true, freeToClaim: true, candidate: false }],
+  ['a free-to-play game', makeFreeGame(), { buyable: false, freeToClaim: true, candidate: false }],
+  ['an unreleased game with no pre-order', makeComingSoonGame(), { buyable: false, freeToClaim: false, candidate: false }],
+];
 
-describe('isBuyable', () => {
-  it('is true for a released game with a price', () => {
-    expect(isBuyable(makeGame({ price: 999 }))).toBe(true);
+describe.each(cases)('%s', (_, game, expected) => {
+  it(`isBuyable is ${expected.buyable}`, () => {
+    expect(isBuyable(game)).toBe(expected.buyable);
   });
 
-  it.each([
-    ['free to play', makeFreeGame()],
-    ['coming soon', makeComingSoonGame()],
-    ['100% off', giveaway],
-  ])('is false when %s', (_, game) => {
-    expect(isBuyable(game)).toBe(false);
+  it(`isFreeToClaim is ${expected.freeToClaim}`, () => {
+    expect(isFreeToClaim(game)).toBe(expected.freeToClaim);
+  });
+
+  it(`isBasketCandidate is ${expected.candidate}`, () => {
+    expect(isBasketCandidate(game)).toBe(expected.candidate);
   });
 });
 
-describe('isFreeToClaim', () => {
-  it.each([
-    ['free to play', makeFreeGame()],
-    ['100% off', giveaway],
-  ])('is true when %s', (_, game) => {
-    expect(isFreeToClaim(game)).toBe(true);
-  });
-
-  it.each([
-    ['a paid game', makeGame({ price: 999 })],
-    ['coming soon (no price yet, not free)', makeComingSoonGame()],
-  ])('is false for %s', (_, game) => {
-    expect(isFreeToClaim(game)).toBe(false);
+describe('makeGame', () => {
+  it('keeps an explicit null price instead of falling back to the default', () => {
+    expect(makeGame({ price: null }).price).toBeNull();
   });
 });

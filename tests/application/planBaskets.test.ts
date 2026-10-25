@@ -3,7 +3,7 @@ import type { Basket } from '../../src/domain/basket';
 import type { Game } from '../../src/domain/game';
 import { findBaskets } from '../../src/domain/findBaskets';
 import { planBaskets, TOP_N } from '../../src/application/planBaskets';
-import { makeComingSoonGame, makeFreeGame, makeGame } from '../fixtures/games';
+import { makeComingSoonGame, makeFreeGame, makeGame, makePreOrderGame } from '../fixtures/games';
 
 // planBaskets is tested on its own: the algorithm and scoring have their own tests in tests/domain.
 vi.mock('../../src/domain/findBaskets', () => ({ findBaskets: vi.fn(() => []) }));
@@ -12,7 +12,7 @@ const findBasketsMock = vi.mocked(findBaskets);
 function basketOf(games: Game[], score = games.length): Basket {
   return {
     games,
-    total: games.reduce((sum, g) => sum + g.price, 0),
+    total: games.reduce((sum, g) => sum + (g.price ?? 0), 0),
     score,
     breakdown: games.map((g) => ({ appId: g.appId, points: score / games.length })),
   };
@@ -71,19 +71,22 @@ describe('planBaskets', () => {
       expect(plan.baskets).toEqual(many.slice(0, TOP_N));
     });
 
-    it('never includes coming-soon games', () => {
-      const paid = makeGame({ price: 500 });
-      findBasketsMock.mockReturnValue([basketOf([paid])]);
+    it('includes pre-orders, but not unreleased games without a price', () => {
+      const preOrder = makePreOrderGame({ price: 1500 });
+      const noPriceYet = makeComingSoonGame();
 
-      const plan = planBaskets([paid, makeComingSoonGame()], BUDGET);
+      planBaskets([preOrder, noPriceYet], BUDGET);
 
-      expect(plan.baskets[0].games).toEqual([paid]);
+      // Works whether findBaskets is given games or scored games ({ game, points }).
+      const passed = (findBasketsMock.mock.calls[0][0] as unknown[]).map((g) =>
+        'game' in (g as object) ? (g as { game: Game }).game.appId : (g as Game).appId,
+      );
+      expect(passed).toEqual([preOrder.appId]);
     });
   });
 
   // TODO(Toby): fill these in as you add free games to planBaskets.
-  // makeFreeGame() builds a free-to-play game; a 100%-off game is
-  // makeGame({ price: 0, originalPrice: 1999, discountPercent: 100 }).
+  // makeFreeGame() builds a free-to-play game (price null); makeGiveawayGame() a 100%-off one (price 0).
   describe('free games', () => {
     it.todo('are added to every basket: free to play and 100% off');
     it.todo('are not passed to findBaskets');

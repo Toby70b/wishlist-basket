@@ -17,8 +17,10 @@ import type { WishlistSource } from '../ports/WishlistSource';
  *   `priority`: it has gaps, is 0 for games never ranked, and disagrees with Steam's order.
  * - Map each item's store_item to Game. Don't filter anything out:
  *     name            ← store_item.name
- *     price           ← Number(best_purchase_option.final_price_in_cents), or 0 if absent
- *     originalPrice   ← Number(best_purchase_option.original_price_in_cents), or 0 if absent
+ *     price           ← Number(best_purchase_option.final_price_in_cents), or null if there's
+ *                       no best_purchase_option (free to play, unreleased without pre-order)
+ *     originalPrice   ← Number(best_purchase_option.original_price_in_cents), else price
+ *                       (Steam omits it when not discounted), or null with no purchase option
  *     discountPercent ← best_purchase_option.discount_pct ?? 0
  *     isFree          ← store_item.is_free === true
  *     isComingSoon    ← store_item.is_coming_soon === true

@@ -1,12 +1,13 @@
 import type { Basket } from './basket';
-import type { Game } from './game';
+import type { PricedGame } from './game';
+import type {ScoredGame} from "./scoring.ts";
 
 /**
  * The basket search. Pure: no React, no I/O.
  *
  * TODO(Toby): implement.
- * - `games` arrive already cleaned: only buyable games (isBuyable), none over `budget`.
- * - `wishlistSize` is N for scoring: the full wishlist length, before any filtering.
+ * - `games` arrive already scored and cleaned: only basket candidates (isBasketCandidate:
+ *   buyable and costs money, so `game.price` is a number), none over `budget`.
  * - Build baskets game by game. Adding a game to an existing basket makes a new basket;
  *   originals never change.
  * - Keep at most 20 baskets per total (per penny); drop the lowest scoring.
@@ -14,7 +15,7 @@ import type { Game } from './game';
  *   (RankScoring); a basket's score is the sum. Fill Basket.breakdown with each game's points.
  * - Return every kept basket sorted by score, best first. The caller takes the top N.
  */
-export function findBaskets(games: Game[], budget: number): Basket[] {
+export function findBaskets(games: ScoredGame<PricedGame>[], budget: number): Basket[] {
   void games;
   void budget;
   return [];

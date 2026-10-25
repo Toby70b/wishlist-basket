@@ -64,16 +64,17 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 function GameRow({ game, points }: { game: Game; points: number | undefined }) {
-  // Free to play has no original price; a 100%-off game shows its usual price struck through.
-  const onSale = !game.isFree && game.discountPercent > 0;
+  // Free to play has no price at all; a 100%-off game shows its usual price struck through.
+  const { price, originalPrice } = game;
+  const onSale = originalPrice !== null && game.discountPercent > 0;
   return (
     <tr>
       <td>{game.name}</td>
       <td className="num">#{game.rank}</td>
       <td className="num price-cell">
         {onSale && <span className="badge-sale">−{game.discountPercent}%</span>}
-        {onSale && <s className="price-original">{formatPence(game.originalPrice)}</s>}
-        <span className="price-final">{game.price === 0 ? 'Free' : formatPence(game.price)}</span>
+        {onSale && <s className="price-original">{formatPence(originalPrice)}</s>}
+        <span className="price-final">{price === null || price === 0 ? 'Free' : formatPence(price)}</span>
       </td>
       <td className="num">{points === undefined ? '—' : formatScore(points)}</td>
     </tr>
