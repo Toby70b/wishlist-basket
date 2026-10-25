@@ -29,7 +29,7 @@ describe('planBaskets', () => {
 
       planBaskets([makeFreeGame(), makeComingSoonGame(), affordable, tooExpensive], BUDGET);
 
-      expect(findBasketsMock).toHaveBeenCalledWith([{ game: affordable, points: expect.any(Number) }], BUDGET);
+      expect(findBasketsMock).toHaveBeenCalledWith([{ game: affordable, score: expect.any(Number) }], BUDGET);
     });
 
     it('includes a game priced exactly at the budget', () => {
@@ -37,7 +37,7 @@ describe('planBaskets', () => {
 
       planBaskets([exact], BUDGET);
 
-      expect(findBasketsMock).toHaveBeenCalledWith([{ game: exact, points: 1 }], BUDGET);
+      expect(findBasketsMock).toHaveBeenCalledWith([{ game: exact, score: 1 }], BUDGET);
     });
 
     it('passes the whole wishlist size as N, counting games that were filtered out', () => {
@@ -45,8 +45,8 @@ describe('planBaskets', () => {
 
       planBaskets(games, BUDGET);
 
-      // wishlistSize = 4 (whole list); games[3]'s rank defaults to 1, so points = 4 + 1 - 1 = 4
-      expect(findBasketsMock).toHaveBeenCalledWith([{ game: games[3], points: 4 }], BUDGET);
+      // wishlistSize = 4 (whole list); games[3]'s rank defaults to 1, so score = 4 + 1 - 1 = 4
+      expect(findBasketsMock).toHaveBeenCalledWith([{ game: games[3], score: 4 }], BUDGET);
     });
 
     it('skips findBaskets when nothing is affordable', () => {

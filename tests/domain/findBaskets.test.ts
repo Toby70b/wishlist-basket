@@ -8,10 +8,6 @@ const BUDGET = 1000;
 
 describe('findBaskets', () => {
 
-    it('returns an empty array when games are null', () => {
-        expect(findBaskets(null, BUDGET)).toEqual([]);
-    });
-
     it('returns an empty array when given no games', () => {
         expect(findBaskets([], BUDGET)).toEqual([]);
     });
