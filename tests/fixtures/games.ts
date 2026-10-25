@@ -1,4 +1,5 @@
 import type { Game } from '../../src/domain/game';
+import type { ScoredGame } from '../../src/domain/scoring';
 
 let nextAppId = 1000;
 
@@ -23,11 +24,6 @@ export function makeGame(overrides: Partial<Game> = {}): Game {
   };
 }
 
-/** A game with a definite price (what findBaskets works with). */
-export function makePricedGame(overrides: Partial<Game> & { price?: number } = {}): Game {
-  return makeGame({ price: 999, ...overrides });
-}
-
 /** Free to play: Steam gives no price, only is_free. */
 export const makeFreeGame = (overrides: Partial<Game> = {}) =>
   makeGame({ price: null, originalPrice: null, isFree: true, ...overrides });
@@ -43,3 +39,9 @@ export const makePreOrderGame = (overrides: Partial<Game> = {}) =>
 /** A paid game at 100% off: buyable, but costs nothing. */
 export const makeGiveawayGame = (overrides: Partial<Game> = {}) =>
   makeGame({ price: 0, originalPrice: 1999, discountPercent: 100, ...overrides });
+
+/** A Game plus the points it adds to a basket; override only what the test cares about. */
+export function makeScoredGame(overrides: Partial<Game> & { score?: number } = {}): ScoredGame {
+  const { score = 1, ...gameOverrides } = overrides;
+  return { game: makeGame(gameOverrides), score: score };
+}

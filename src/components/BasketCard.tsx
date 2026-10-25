@@ -17,8 +17,8 @@ export function BasketCard({ basket, position, budget }: Props) {
         <summary className="basket__summary">
           <span className="basket__position">#{position}</span>
           <dl className="basket__stats">
-            <Stat label="Spent" value={formatPence(basket.total)} />
-            <Stat label="Left" value={formatPence(budget - basket.total)} />
+            <Stat label="Spent" value={formatPence(basket.totalCost)} />
+            <Stat label="Left" value={formatPence(budget - basket.totalCost)} />
             <Stat label="Games" value={String(basket.games.length)} />
             <Stat label="Score" value={formatScore(basket.score)} />
           </dl>
@@ -41,7 +41,7 @@ export function BasketCard({ basket, position, budget }: Props) {
           <tfoot>
             <tr>
               <th scope="row" colSpan={2}>Total</th>
-              <td className="num">{formatPence(basket.total)}</td>
+              <td className="num">{formatPence(basket.totalCost)}</td>
             </tr>
           </tfoot>
         </table>

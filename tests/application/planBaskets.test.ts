@@ -11,7 +11,7 @@ const findBasketsMock = vi.mocked(findBaskets);
 
 function basketOf(games: Game[], score = games.length): Basket {
   const points = score / games.length;
-  return new Basket(games.map((game) => ({ game, points })));
+  return new Basket(games.map((game) => ({ game, score: points })));
 }
 
 const BUDGET = 2000;
@@ -123,7 +123,7 @@ describe('planBaskets', () => {
       const plan = planBaskets([paid, free], BUDGET);
 
       // wishlistSize = 2 (paid + free); free's points = wishlistSize + 1 - rank = 2 + 1 - 1 = 2
-      expect(plan.baskets[0].total).toBe(500);
+      expect(plan.baskets[0].totalCost).toBe(500);
       expect(plan.baskets[0].score).toBe(12);
     });
 
@@ -147,7 +147,7 @@ describe('planBaskets', () => {
 
       expect(plan.baskets).toHaveLength(1);
       expect(plan.baskets[0].games.map((g) => g.appId)).toEqual([freeGame.appId]);
-      expect(plan.baskets[0].total).toBe(0);
+      expect(plan.baskets[0].totalCost).toBe(0);
       expect(plan.cheapestPrice).toBe(5000);
     });
 
@@ -160,7 +160,7 @@ describe('planBaskets', () => {
       expect(plan.baskets).toHaveLength(1);
       expect(plan.baskets[0].games.map((g) => g.appId)).toEqual([paidGame.appId]);
       expect(plan.baskets[0].score).toBe(5);
-      expect(plan.baskets[0].total).toBe(100);
+      expect(plan.baskets[0].totalCost).toBe(100);
     });
 
     it('are scored against the whole wishlist size, the same as paid games', () => {

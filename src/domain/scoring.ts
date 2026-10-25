@@ -1,7 +1,7 @@
 import type { Game } from './game';
 
 /** A game with the points it adds to any basket it's in. */
-export type ScoredGame = { game: Game; points: number };
+export type ScoredGame = { game: Game; score: number };
 
 /** How many points a game is worth. Games are scored before they go into baskets. */
 export interface ScoringPolicy {
@@ -23,6 +23,6 @@ export class RankScoring implements ScoringPolicy {
   }
 
   score(game: Game): ScoredGame {
-    return { game, points: this.wishlistSize + 1 - game.rank };
+    return { game, score: this.wishlistSize + 1 - game.rank };
   }
 }

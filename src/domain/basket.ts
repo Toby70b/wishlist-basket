@@ -8,14 +8,14 @@ import type { ScoredGame } from './scoring';
 export class Basket {
   readonly scoredGames: ScoredGame[];
   // The total price of all games in the basket, in pence.
-  readonly total: number;
+  readonly totalCost: number;
   // The sum of each game's points from the ScoringPolicy (see scoring.ts). Higher is better.
   readonly score: number;
 
   constructor(scoredGames: ScoredGame[]) {
     this.scoredGames = scoredGames;
-    this.total = scoredGames.reduce((sum, s) => sum + (s.game.price ?? 0), 0);
-    this.score = scoredGames.reduce((sum, s) => sum + s.points, 0);
+    this.totalCost = scoredGames.reduce((sum, s) => sum + (s.game.price ?? 0), 0);
+    this.score = scoredGames.reduce((sum, s) => sum + s.score, 0);
   }
 
   get games(): Game[] {

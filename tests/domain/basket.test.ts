@@ -8,8 +8,8 @@ describe('Basket', () => {
     const b = makeGame();
 
     const basket = new Basket([
-      { game: a, points: 3 },
-      { game: b, points: 1 },
+      { game: a, score: 3 },
+      { game: b, score: 1 },
     ]);
 
     expect(basket.games).toEqual([a, b]);
@@ -20,11 +20,11 @@ describe('Basket', () => {
     const b = makeGame({ price: 1500 });
 
     const basket = new Basket([
-      { game: a, points: 1 },
-      { game: b, points: 1 },
+      { game: a, score: 1 },
+      { game: b, score: 1 },
     ]);
 
-    expect(basket.total).toBe(2000);
+    expect(basket.totalCost).toBe(2000);
   });
 
   it('scores as the sum of each game\'s points', () => {
@@ -32,8 +32,8 @@ describe('Basket', () => {
     const b = makeGame();
 
     const basket = new Basket([
-      { game: a, points: 3 },
-      { game: b, points: 7 },
+      { game: a, score: 3 },
+      { game: b, score: 7 },
     ]);
 
     expect(basket.score).toBe(10);
@@ -43,7 +43,7 @@ describe('Basket', () => {
     const basket = new Basket([]);
 
     expect(basket.games).toEqual([]);
-    expect(basket.total).toBe(0);
+    expect(basket.totalCost).toBe(0);
     expect(basket.score).toBe(0);
   });
 
@@ -53,12 +53,12 @@ describe('Basket', () => {
     const giveaway = makeGiveawayGame();
 
     const basket = new Basket([
-      { game: paid, points: 5 },
-      { game: free, points: 2 },
-      { game: giveaway, points: 1 },
+      { game: paid, score: 5 },
+      { game: free, score: 2 },
+      { game: giveaway, score: 1 },
     ]);
 
-    expect(basket.total).toBe(1000);
+    expect(basket.totalCost).toBe(1000);
     expect(basket.score).toBe(8);
   });
 });
