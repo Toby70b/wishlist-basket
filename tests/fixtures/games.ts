@@ -1,4 +1,4 @@
-import type { Game, PricedGame } from '../../src/domain/game';
+import type { Game } from '../../src/domain/game';
 
 let nextAppId = 1000;
 
@@ -23,9 +23,9 @@ export function makeGame(overrides: Partial<Game> = {}): Game {
   };
 }
 
-/** A game with a definite price, typed as PricedGame (what findBaskets works with). */
-export function makePricedGame(overrides: Partial<Game> & { price?: number } = {}): PricedGame {
-  return makeGame({ price: 999, ...overrides }) as PricedGame;
+/** A game with a definite price (what findBaskets works with). */
+export function makePricedGame(overrides: Partial<Game> & { price?: number } = {}): Game {
+  return makeGame({ price: 999, ...overrides });
 }
 
 /** Free to play: Steam gives no price, only is_free. */

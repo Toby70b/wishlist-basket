@@ -11,11 +11,8 @@ export type Game = {
   isComingSoon: boolean; // not released yet; has a price only if it can be pre-ordered
 };
 
-/** A game Steam will sell: price and originalPrice are definitely numbers. */
-export type PricedGame = Game & { price: number; originalPrice: number };
-
 /** Steam will sell it to you: paid, discounted, 100% off, or pre-order. */
-export function isBuyable(game: Game): game is PricedGame {
+export function isBuyable(game: Game): boolean {
   return game.price !== null;
 }
 
@@ -25,6 +22,6 @@ export function isFreeToClaim(game: Game): boolean {
 }
 
 /** Goes into findBaskets: you can buy it and it costs money. */
-export function isBasketCandidate(game: Game): game is PricedGame {
+export function isBasketCandidate(game: Game): boolean {
   return isBuyable(game) && !isFreeToClaim(game);
 }

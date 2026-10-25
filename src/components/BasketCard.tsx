@@ -9,8 +9,6 @@ type Props = {
 };
 
 export function BasketCard({ basket, position, budget }: Props) {
-  // Requires Basket.breakdown (see notes for Toby).
-  const points = new Map(basket.breakdown.map((b) => [b.appId, b.points]));
   const games = [...basket.games].sort((a, b) => a.rank - b.rank);
 
   return (
@@ -33,19 +31,17 @@ export function BasketCard({ basket, position, budget }: Props) {
               <th scope="col">Game</th>
               <th scope="col" className="num">Rank</th>
               <th scope="col" className="num">Price</th>
-              <th scope="col" className="num">Points</th>
             </tr>
           </thead>
           <tbody>
             {games.map((g) => (
-              <GameRow key={g.appId} game={g} points={points.get(g.appId)} />
+              <GameRow key={g.appId} game={g} />
             ))}
           </tbody>
           <tfoot>
             <tr>
               <th scope="row" colSpan={2}>Total</th>
               <td className="num">{formatPence(basket.total)}</td>
-              <td className="num">{formatScore(basket.score)}</td>
             </tr>
           </tfoot>
         </table>
@@ -63,7 +59,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function GameRow({ game, points }: { game: Game; points: number | undefined }) {
+function GameRow({ game }: { game: Game }) {
   // Free to play has no price at all; a 100%-off game shows its usual price struck through.
   const { price, originalPrice } = game;
   const onSale = originalPrice !== null && game.discountPercent > 0;
@@ -76,7 +72,6 @@ function GameRow({ game, points }: { game: Game; points: number | undefined }) {
         {onSale && <s className="price-original">{formatPence(originalPrice)}</s>}
         <span className="price-final">{price === null || price === 0 ? 'Free' : formatPence(price)}</span>
       </td>
-      <td className="num">{points === undefined ? '—' : formatScore(points)}</td>
     </tr>
   );
 }
