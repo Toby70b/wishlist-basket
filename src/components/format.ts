@@ -5,6 +5,9 @@ export function formatPence(pence: number): string {
   return gbp.format(pence / 100);
 }
 
+const wholeNumber = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 });
+
+/** Scores are whole numbers (N + 1 - rank per game), e.g. 1,858. */
 export function formatScore(score: number): string {
-  return score.toFixed(2);
+  return wholeNumber.format(score);
 }

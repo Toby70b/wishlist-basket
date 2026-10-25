@@ -192,6 +192,7 @@ h2 { font-size: 1.15rem; }
 
 .basket__summary {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
@@ -223,6 +224,43 @@ h2 { font-size: 1.15rem; }
   flex: none;
 }
 details[open] .basket__chevron { transform: rotate(-135deg); }
+
+/* Capsule thumbnails under the stats, lined up with them */
+.basket__thumbs {
+  order: 10;
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: calc(2.2em + 12px);
+}
+.basket__more { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+
+/* ---------- Capsule images ---------- */
+
+.capsule {
+  display: block;
+  flex: none;
+  height: auto;
+  aspect-ratio: 231 / 87;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--surface-2);
+}
+.capsule--thumb { width: 64px; }
+.capsule--row { width: 92px; }
+.capsule--placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.capsule--placeholder svg { width: auto; height: 70%; }
+
+.game-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.game-cell__name { min-width: 0; }
 
 .basket__games {
   width: 100%;
@@ -256,8 +294,9 @@ details[open] .basket__chevron { transform: rotate(-135deg); }
 }
 
 @media (max-width: 520px) {
-  .basket__summary { flex-wrap: wrap; }
   .basket__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); order: 3; flex-basis: 100%; }
+  .basket__thumbs { padding-left: 0; }
+  .capsule--row { width: 72px; }
   .basket__position { flex: 1; }
   .basket__games th,
   .basket__games td { padding: 8px 10px; }

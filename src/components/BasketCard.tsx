@@ -1,6 +1,9 @@
 import type { Basket } from '../domain/basket';
 import type { Game } from '../domain/game';
 import { formatPence, formatScore } from './format';
+import { GameCapsule } from './GameCapsule';
+
+const MAX_THUMBS = 5;
 
 type Props = {
   basket: Basket;
@@ -10,6 +13,8 @@ type Props = {
 
 export function BasketCard({ basket, position, budget }: Props) {
   const games = [...basket.games].sort((a, b) => a.rank - b.rank);
+  const thumbs = games.slice(0, MAX_THUMBS);
+  const hiddenCount = games.length - thumbs.length;
 
   return (
     <li className="basket">
@@ -23,6 +28,12 @@ export function BasketCard({ basket, position, budget }: Props) {
             <Stat label="Score" value={formatScore(basket.score)} />
           </dl>
           <span className="basket__chevron" aria-hidden="true" />
+          <span className="basket__thumbs" aria-hidden="true">
+            {thumbs.map((g) => (
+              <GameCapsule key={g.appId} appId={g.appId} size="thumb" />
+            ))}
+            {hiddenCount > 0 && <span className="basket__more">+{hiddenCount}</span>}
+          </span>
         </summary>
 
         <table className="basket__games">
@@ -65,7 +76,12 @@ function GameRow({ game }: { game: Game }) {
   const onSale = originalPrice !== null && game.discountPercent > 0;
   return (
     <tr>
-      <td>{game.name}</td>
+      <td>
+        <span className="game-cell">
+          <GameCapsule key={game.appId} appId={game.appId} />
+          <span className="game-cell__name">{game.name}</span>
+        </span>
+      </td>
       <td className="num">#{game.rank}</td>
       <td className="num price-cell">
         {onSale && <span className="badge-sale">−{game.discountPercent}%</span>}
