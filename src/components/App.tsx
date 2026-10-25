@@ -3,7 +3,6 @@ import {useWishlist} from '../hooks/useWishlist';
 import {useBaskets} from '../hooks/useBaskets';
 import {SearchForm} from './SearchForm';
 import {BasketList} from './BasketList';
-import {FreeGames} from './FreeGames';
 import {EmptyState} from './EmptyState';
 import {formatPence} from './format';
 import './app.css';
@@ -15,14 +14,12 @@ export function App() {
     const {games, isLoading, error} = useWishlist(steamId);
 
     // The entered budget is the algorithm's budget; it reruns when the user submits a new amount.
-    const {baskets: visible, freeGames, cheapestPrice, isComputing} = useBaskets(games, budget);
+    const {baskets: visible, cheapestPrice, isComputing} = useBaskets(games, budget);
 
     function search(id: string, amount: number) {
         setSteamId(id);
         setBudget(amount);
     }
-
-    const hasWishlist = games !== undefined && !isLoading && !error;
 
     function renderResults() {
         if (!steamId) {
@@ -77,7 +74,6 @@ export function App() {
 
                 <main className="app__results">
                     {renderResults()}
-                    {hasWishlist && <FreeGames games={freeGames}/>}
                 </main>
             </div>
         </div>

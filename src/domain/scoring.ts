@@ -1,15 +1,28 @@
+import type { Game } from './game';
+
+/** A game with the points it adds to any basket it's in. */
+export type ScoredGame = { game: Game; points: number };
+
+/** How many points a game is worth. Games are scored before they go into baskets. */
+export interface ScoringPolicy {
+  score(game: Game): ScoredGame;
+}
+
 /**
- * Points a game adds to a basket's score.
- *
- * TODO(Toby): implement: wishlistSize + 1 - rank.
- * - Your #1 game scores wishlistSize; your last scores 1. Never 0 or negative.
- * - wishlistSize is N, the total number of games on the wishlist before any filtering.
- *   It must not change with the budget: every game in a basket adds N + 1 - rank, so N
- *   sets how much "more games" counts against "better games".
- * - Basket score = sum of its games' points.
+ * Scores by wishlist rank: points = N + 1 - rank. The #1 game scores N, the last scores 1,
+ * so every game adds something to a basket.
+ * wishlistSize is N, the whole wishlist before any filtering, so a game's points don't
+ * change with the budget.
  */
-export function gamePoints(rank: number, wishlistSize: number): number {
-  void rank;
-  void wishlistSize;
-  return 0;
+export class RankScoring implements ScoringPolicy {
+  // Declared explicitly: tsconfig's erasableSyntaxOnly rules out constructor parameter properties.
+  private readonly wishlistSize: number;
+
+  constructor(wishlistSize: number) {
+    this.wishlistSize = wishlistSize;
+  }
+
+  score(game: Game): ScoredGame {
+    return { game, points: this.wishlistSize + 1 - game.rank };
+  }
 }

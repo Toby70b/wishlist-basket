@@ -263,7 +263,7 @@ details[open] .basket__chevron { transform: rotate(-135deg); }
   .basket__games td { padding: 8px 10px; }
 }
 
-/* ---------- Empty / loading / free ---------- */
+/* ---------- Empty / loading ---------- */
 
 .empty {
   background: var(--surface);
@@ -277,16 +277,3 @@ details[open] .basket__chevron { transform: rotate(-135deg); }
 .empty__body p { margin: 0; }
 
 .loading { display: flex; align-items: center; gap: 10px; padding: 24px; color: var(--text-muted); }
-
-.free-games h2 { margin-bottom: 10px; }
-.free-games__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.free-games__list li {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: var(--surface-2);
-  border-radius: 8px;
-}
-.free-games__list a { color: var(--accent); text-decoration: none; }
-.free-games__list a:hover { text-decoration: underline; }

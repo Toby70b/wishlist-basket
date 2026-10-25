@@ -5,16 +5,16 @@ import { findBaskets } from '../../src/domain/findBaskets';
 import { planBaskets, TOP_N } from '../../src/application/planBaskets';
 import { makeComingSoonGame, makeFreeGame, makeGame } from '../fixtures/games';
 
-// planBaskets is tested on its own; the algorithm has its own tests in tests/domain.
+// planBaskets is tested on its own: the algorithm and scoring have their own tests in tests/domain.
 vi.mock('../../src/domain/findBaskets', () => ({ findBaskets: vi.fn(() => []) }));
 const findBasketsMock = vi.mocked(findBaskets);
 
-function basketOf(games: Game[]): Basket {
+function basketOf(games: Game[], score = games.length): Basket {
   return {
     games,
     total: games.reduce((sum, g) => sum + g.price, 0),
-    score: games.length,
-    breakdown: games.map((g) => ({ appId: g.appId, points: 1 })),
+    score,
+    breakdown: games.map((g) => ({ appId: g.appId, points: score / games.length })),
   };
 }
 
@@ -26,65 +26,71 @@ beforeEach(() => {
 });
 
 describe('planBaskets', () => {
-  it('lists free-to-claim games by wishlist rank: free to play and 100% off', () => {
-    const freeToPlay = makeFreeGame({ rank: 5 });
-    const giveaway = makeGame({ price: 0, originalPrice: 1999, discountPercent: 100, rank: 2 });
-    const paid = makeGame({ price: 500, rank: 1 });
+  describe('choosing which games go to findBaskets', () => {
+    it('passes only buyable, affordable games', () => {
+      const affordable = makeGame({ price: 1500 });
+      const tooDear = makeGame({ price: 2500 });
 
-    const plan = planBaskets([freeToPlay, paid, giveaway], BUDGET);
+      planBaskets([makeFreeGame(), makeComingSoonGame(), affordable, tooDear], BUDGET);
 
-    expect(plan.freeGames).toEqual([giveaway, freeToPlay]);
+      expect(findBasketsMock).toHaveBeenCalledWith([affordable], BUDGET, expect.any(Number));
+    });
+
+    it('includes a game priced exactly at the budget', () => {
+      const exact = makeGame({ price: BUDGET });
+
+      planBaskets([exact], BUDGET);
+
+      expect(findBasketsMock).toHaveBeenCalledWith([exact], BUDGET, 1);
+    });
+
+    it('passes the whole wishlist size as N, counting games that were filtered out', () => {
+      const games = [makeFreeGame(), makeComingSoonGame(), makeGame({ price: 5000 }), makeGame({ price: 100 })];
+
+      planBaskets(games, BUDGET);
+
+      expect(findBasketsMock).toHaveBeenCalledWith([games[3]], BUDGET, 4);
+    });
+
+    it('skips findBaskets when nothing is affordable', () => {
+      const plan = planBaskets([makeGame({ price: 5000 })], BUDGET);
+
+      expect(findBasketsMock).not.toHaveBeenCalled();
+      expect(plan.baskets).toEqual([]);
+    });
   });
 
-  it('leaves coming-soon games out of both the free list and the baskets', () => {
-    const comingSoon = makeComingSoonGame();
+  describe('baskets', () => {
+    it(`returns at most the top ${TOP_N}, in the order findBaskets gives`, () => {
+      const game = makeGame({ price: 100 });
+      const many = Array.from({ length: TOP_N + 5 }, () => basketOf([game]));
+      findBasketsMock.mockReturnValue(many);
 
-    const plan = planBaskets([comingSoon], BUDGET);
+      const plan = planBaskets([game], BUDGET);
 
-    expect(plan.freeGames).toEqual([]);
-    expect(findBasketsMock).not.toHaveBeenCalled();
+      expect(plan.baskets).toEqual(many.slice(0, TOP_N));
+    });
+
+    it('never includes coming-soon games', () => {
+      const paid = makeGame({ price: 500 });
+      findBasketsMock.mockReturnValue([basketOf([paid])]);
+
+      const plan = planBaskets([paid, makeComingSoonGame()], BUDGET);
+
+      expect(plan.baskets[0].games).toEqual([paid]);
+    });
   });
 
-  it('passes only buyable, affordable games to findBaskets', () => {
-    const affordable = makeGame({ price: 1500 });
-    const tooDear = makeGame({ price: 2500 });
-
-    planBaskets([makeFreeGame(), makeComingSoonGame(), affordable, tooDear], BUDGET);
-
-    expect(findBasketsMock).toHaveBeenCalledWith([affordable], BUDGET, expect.any(Number));
-  });
-
-  it('includes a game priced exactly at the budget', () => {
-    const exact = makeGame({ price: BUDGET });
-
-    planBaskets([exact], BUDGET);
-
-    expect(findBasketsMock).toHaveBeenCalledWith([exact], BUDGET, 1);
-  });
-
-  it('passes the whole wishlist size as N, counting games that were filtered out', () => {
-    const games = [makeFreeGame(), makeComingSoonGame(), makeGame({ price: 5000 }), makeGame({ price: 100 })];
-
-    planBaskets(games, BUDGET);
-
-    expect(findBasketsMock).toHaveBeenCalledWith([games[3]], BUDGET, 4);
-  });
-
-  it(`returns at most the top ${TOP_N} baskets, in the order findBaskets gives`, () => {
-    const game = makeGame({ price: 100 });
-    const many = Array.from({ length: TOP_N + 5 }, () => basketOf([game]));
-    findBasketsMock.mockReturnValue(many);
-
-    const plan = planBaskets([game], BUDGET);
-
-    expect(plan.baskets).toEqual(many.slice(0, TOP_N));
-  });
-
-  it('skips findBaskets when nothing is affordable', () => {
-    const plan = planBaskets([makeGame({ price: 5000 })], BUDGET);
-
-    expect(findBasketsMock).not.toHaveBeenCalled();
-    expect(plan.baskets).toEqual([]);
+  // TODO(Toby): fill these in as you add free games to planBaskets.
+  // makeFreeGame() builds a free-to-play game; a 100%-off game is
+  // makeGame({ price: 0, originalPrice: 1999, discountPercent: 100 }).
+  describe('free games', () => {
+    it.todo('are added to every basket: free to play and 100% off');
+    it.todo('are not passed to findBaskets');
+    it.todo('add their points to the score and breakdown, but nothing to the total');
+    it.todo("don't change the order of the baskets");
+    it.todo('make a £0 basket on their own when no paid game fits the budget');
+    it.todo("don't affect anything when there are none");
   });
 
   describe('cheapestPrice', () => {

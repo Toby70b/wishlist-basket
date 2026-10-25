@@ -10,13 +10,12 @@ import type { Game } from './game';
  * - Build baskets game by game. Adding a game to an existing basket makes a new basket;
  *   originals never change.
  * - Keep at most 20 baskets per total (per penny); drop the lowest scoring.
- * - Score each game with gamePoints(rank, wishlistSize) from scoring.ts; a basket's score
- *   is the sum. Fill Basket.breakdown with each game's points.
+ * - Games are scored before they go into baskets, with a ScoringPolicy from scoring.ts
+ *   (RankScoring); a basket's score is the sum. Fill Basket.breakdown with each game's points.
  * - Return every kept basket sorted by score, best first. The caller takes the top N.
  */
-export function findBaskets(games: Game[], budget: number, wishlistSize: number): Basket[] {
+export function findBaskets(games: Game[], budget: number): Basket[] {
   void games;
   void budget;
-  void wishlistSize;
   return [];
 }
