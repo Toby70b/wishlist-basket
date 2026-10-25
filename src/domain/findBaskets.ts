@@ -5,7 +5,6 @@ import type {ScoredGame} from "./scoring.ts";
 /**
  * The basket search. Pure: no React, no I/O.
  *
- * TODO(Toby): implement.
  * - `games` arrive already scored and cleaned: only basket candidates (isBasketCandidate:
  *   buyable and costs money), none over `budget`.
  * - Build baskets game by game. Adding a game to an existing basket makes a new basket;

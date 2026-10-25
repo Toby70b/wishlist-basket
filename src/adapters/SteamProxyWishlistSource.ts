@@ -6,7 +6,6 @@ import type { WishlistSource } from '../ports/WishlistSource';
  * locally (WireMock or Steam, see STEAM_API_URL), CloudFront in production.
  * Steam sends no CORS headers, so the browser can't call it directly.
  *
- * TODO(Toby): implement getWishlist.
  * - One request: GET {baseUrl}/IWishlistService/GetWishlistSortedFiltered/v1/?input_json=
  *     {"steamid":"…","context":{"language":"english","country_code":"GB"},
  *      "data_request":{},"start_index":0,"page_size":500}
