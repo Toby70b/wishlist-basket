@@ -4,11 +4,23 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './components/App';
 import { WishlistSourceProvider } from './hooks/WishlistSourceContext';
 import { SteamProxyWishlistSource } from './adapters/SteamProxyWishlistSource';
+import {MockWishlistSource} from "./adapters/MockWishlistSource.ts";
+
+
+const createWishlistSource = () => {
+    if (import.meta.env.DEV && import.meta.env.VITE_MOCK_WISHLIST_API === 'true') {
+      return new MockWishlistSource()
+    }
+    else {
+      return new SteamProxyWishlistSource('/api')
+    }
+}
+
 
 // Composition root: the only file that knows which adapter is real.
 // /api goes to the dev proxy (WireMock or Steam, see STEAM_API_URL) locally, and to the
 // Lambda via CloudFront in production.
-const wishlistSource = new SteamProxyWishlistSource('/api');
+const wishlistSource = createWishlistSource();
 
 const queryClient = new QueryClient({
   defaultOptions: {
