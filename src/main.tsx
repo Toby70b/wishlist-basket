@@ -4,23 +4,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './components/App';
 import { WishlistSourceProvider } from './hooks/WishlistSourceContext';
 import { SteamProxyWishlistSource } from './adapters/SteamProxyWishlistSource';
-import {MockWishlistSource} from "./adapters/MockWishlistSource.ts";
+import type { WishlistSource } from './ports/WishlistSource';
 
-
-const createWishlistSource = () => {
-    if (import.meta.env.DEV && import.meta.env.VITE_MOCK_WISHLIST_API === 'true') {
-      return new MockWishlistSource()
-    }
-    else {
-      return new SteamProxyWishlistSource('/api')
-    }
+// The mock is loaded with import() inside the DEV check, never a top-level import: in a
+// production build DEV is false, so the bundler drops this branch and the mock (and its
+// wishlist data) never reaches dist/. A top-level import kept the data in the bundle.
+async function createWishlistSource(): Promise<WishlistSource> {
+  if (import.meta.env.DEV && import.meta.env.VITE_MOCK_WISHLIST_API === 'true') {
+    const { MockWishlistSource } = await import('./adapters/MockWishlistSource');
+    return new MockWishlistSource();
+  }
+  return new SteamProxyWishlistSource('/api');
 }
 
-
 // Composition root: the only file that knows which adapter is real.
-// /api goes to the dev proxy (WireMock or Steam, see STEAM_API_URL) locally, and to the
-// Lambda via CloudFront in production.
-const wishlistSource = createWishlistSource();
+// /api goes to the Vite dev proxy locally, and through CloudFront to Steam in production.
+const wishlistSource = await createWishlistSource();
 
 const queryClient = new QueryClient({
   defaultOptions: {

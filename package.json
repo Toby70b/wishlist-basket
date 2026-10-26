@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "mock": "docker compose -f wiremock/docker-compose.yml up"
+    "mock": "docker compose -f wiremock/docker-compose.yml up",
+    "postbuild": "node scripts/check-no-mocks.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.1",
