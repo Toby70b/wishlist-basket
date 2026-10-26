@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { formatPence } from './format';
+import { WishlistError } from '../ports/WishlistSource';
 
 type Props = {
   onSubmit: (steamId: string, budget: number) => void;
@@ -10,14 +11,14 @@ type Props = {
 export const MIN_BUDGET = 100; // £1
 export const MAX_BUDGET = 10000; // £100
 
-// Assumes the adapter throws errors carrying a `kind` field (see notes for Toby).
-type WishlistErrorKind = 'private' | 'invalid-id' | 'unavailable';
-
+// Uses the real WishlistError class (not a cast), so renaming its fields breaks the build here
+// instead of silently falling through to the generic message.
 function describeError(error: Error): string {
-  const kind = (error as Error & { kind?: WishlistErrorKind }).kind;
-  switch (kind) {
+  const type = error instanceof WishlistError ? error.type : undefined;
+  switch (type) {
     case 'private':
-      return "That wishlist is private. In Steam, set Profile → Privacy → Game details to Public, then try again.";
+      // Steam answers a private wishlist and an empty one the same way, so cover both.
+      return "We couldn't see any games on that wishlist. It may be empty, or private: in Steam, set Profile → Privacy → Game details to Public, then try again.";
     case 'invalid-id':
       return "We couldn't find a Steam account with that ID. Check it's the 17-digit SteamID64.";
     case 'unavailable':
@@ -104,8 +105,12 @@ export function SearchForm({ onSubmit, isLoading, error }: Props) {
             value={budgetText}
             onChange={(e) => setBudgetText(e.target.value)}
             aria-invalid={!!budgetError}
+            aria-describedby="budget-help"
           />
         </div>
+        <p id="budget-help" className="field-help">
+          Larger budgets can take a few seconds to work out on big wishlists.
+        </p>
         {budgetError && (
           <p className="field-error" role="alert">
             {budgetError}

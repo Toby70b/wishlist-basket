@@ -26,7 +26,7 @@ describe('loadWishlist', () => {
       const error = await loadWishlist(source, badId).catch((e: unknown) => e);
 
       expect(error).toBeInstanceOf(WishlistError);
-      expect((error as WishlistError).kind).toBe('invalid-id');
+      expect((error as WishlistError).type).toBe('invalid-id');
       expect(source.getWishlist).not.toHaveBeenCalled();
     },
   );

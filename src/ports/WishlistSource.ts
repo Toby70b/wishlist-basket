@@ -12,15 +12,15 @@ export interface WishlistSource {
   getWishlist(steamId: string): Promise<Game[]>;
 }
 
-export type WishlistErrorKind = 'private' | 'invalid-id' | 'unavailable';
+export type WishlistErrorType = 'private' | 'invalid-id' | 'unavailable';
 
 /** The UI reads `kind` to choose its error message. */
 export class WishlistError extends Error {
-  readonly kind: WishlistErrorKind;
+  readonly type: WishlistErrorType;
 
-  constructor(kind: WishlistErrorKind, message: string) {
+  constructor(kind: WishlistErrorType, message: string) {
     super(message);
     this.name = 'WishlistError';
-    this.kind = kind;
+    this.type = kind;
   }
 }

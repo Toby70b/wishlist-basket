@@ -20,6 +20,7 @@ export function makeGame(overrides: Partial<Game> = {}): Game {
     rank: 1,
     isFree: false,
     isComingSoon: false,
+    isBestPurchaseOptionAsPartOfBundle: false,
     ...overrides,
   };
 }

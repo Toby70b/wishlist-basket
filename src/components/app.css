@@ -177,7 +177,7 @@ h2 { font-size: 1.15rem; }
   opacity: 0;
   transition: opacity 150ms;
 }
-.recalc--on { opacity: 1; }
+.recalc--on { opacity: 1; display: inline-flex; align-items: center; gap: 6px; }
 
 .basket-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; transition: opacity 150ms; }
 .basket-list--stale { opacity: 0.6; }
@@ -284,6 +284,46 @@ details[open] .basket__chevron { transform: rotate(-135deg); }
 
 .price-cell { display: flex; justify-content: flex-end; align-items: center; gap: 6px; flex-wrap: wrap; }
 .price-original { color: var(--text-muted); font-size: 0.85em; }
+
+/* Bundle price: asterisk with a tooltip on hover, focus or tap */
+.bundle-note { position: relative; display: inline-flex; }
+.bundle-note__mark {
+  border: 0;
+  background: none;
+  padding: 0 2px;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  cursor: help;
+}
+.bundle-note__mark:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.bundle-note__tip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 2;
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+.bundle-note:hover .bundle-note__tip,
+.bundle-note__mark:focus + .bundle-note__tip { opacity: 1; visibility: visible; }
+
+.basket__footnote td { font-size: 0.8rem; font-weight: 400; color: var(--text-muted); padding-top: 0; }
 .badge-sale {
   background: var(--sale-bg);
   color: var(--sale);
@@ -316,3 +356,4 @@ details[open] .basket__chevron { transform: rotate(-135deg); }
 .empty__body p { margin: 0; }
 
 .loading { display: flex; align-items: center; gap: 10px; padding: 24px; color: var(--text-muted); }
+.loading__note { display: block; margin-top: 2px; font-size: 0.85rem; }

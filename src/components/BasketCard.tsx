@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { Basket } from '../domain/basket';
 import type { Game } from '../domain/game';
 import { formatPence, formatScore } from './format';
@@ -15,6 +16,7 @@ export function BasketCard({ basket, position, budget }: Props) {
   const games = [...basket.games].sort((a, b) => a.rank - b.rank);
   const thumbs = games.slice(0, MAX_THUMBS);
   const hiddenCount = games.length - thumbs.length;
+  const hasBundlePrice = games.some((g) => g.isBestPurchaseOptionAsPartOfBundle);
 
   return (
     <li className="basket">
@@ -54,6 +56,11 @@ export function BasketCard({ basket, position, budget }: Props) {
               <th scope="row" colSpan={2}>Total</th>
               <td className="num">{formatPence(basket.totalCost)}</td>
             </tr>
+            {hasBundlePrice && (
+              <tr className="basket__footnote">
+                <td colSpan={3}>* Cheapest as part of a Steam bundle; that price may include other games.</td>
+              </tr>
+            )}
           </tfoot>
         </table>
       </details>
@@ -87,7 +94,26 @@ function GameRow({ game }: { game: Game }) {
         {onSale && <span className="badge-sale">−{game.discountPercent}%</span>}
         {onSale && <s className="price-original">{formatPence(originalPrice)}</s>}
         <span className="price-final">{price === null || price === 0 ? 'Free' : formatPence(price)}</span>
+        {game.isBestPurchaseOptionAsPartOfBundle && <BundleNote />}
       </td>
     </tr>
+  );
+}
+
+/**
+ * The asterisk next to a bundle price. A button (not plain text) so the tooltip opens on
+ * hover, on keyboard focus and on tap, and screen readers announce the explanation.
+ */
+function BundleNote() {
+  const tooltipId = useId();
+  return (
+    <span className="bundle-note">
+      <button type="button" className="bundle-note__mark" aria-describedby={tooltipId} aria-label="Bundle price">
+        *
+      </button>
+      <span role="tooltip" id={tooltipId} className="bundle-note__tip">
+        Cheapest as part of a Steam bundle. This price may include other games.
+      </span>
+    </span>
   );
 }

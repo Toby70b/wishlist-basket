@@ -14,7 +14,7 @@ export const MOCK_STEAM_IDS = {
   freeOnly: '76561190000000004', // only free games: a single £0 basket
   expensiveOnly: '76561190000000005', // £40+ games only: "Nothing affordable" at a £20 budget
   unreleasedOnly: '76561190000000006', // nothing buyable at all
-  small: '76561190000000007', // 8 games covering every kind of game
+  small: '76561190000000007', // 9 games covering every kind of game, including a bundle price
 } as const;
 
 const DELAY_MS = 600; // long enough to see the loading spinner
@@ -35,6 +35,7 @@ const SMALL_WISHLIST: Game[] = reRank([
     3354750, // skate.: free to play
     848350, // Katamari Damacy REROLL: cheap, 75% off
     2677660, // Indiana Jones: expensive
+    2412960, // Breathedge 2: cheapest as part of a 2-game bundle (shows the * tooltip)
   ),
   { ...byId.get(1313140)!, price: 0, discountPercent: 100 }, // Cult of the Lamb as a 100%-off giveaway
 ]);

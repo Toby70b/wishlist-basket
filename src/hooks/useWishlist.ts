@@ -14,7 +14,7 @@ const MAX_RETRIES = 2;
 
 /** Retrying can't fix a private wishlist or a bad ID; only retry when Steam may recover. */
 function shouldRetry(failureCount: number, error: Error): boolean {
-  if (error instanceof WishlistError && error.kind !== 'unavailable') return false;
+  if (error instanceof WishlistError && error.type !== 'unavailable') return false;
   return failureCount < MAX_RETRIES;
 }
 

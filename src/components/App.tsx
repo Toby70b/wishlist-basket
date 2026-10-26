@@ -48,6 +48,17 @@ export function App() {
                 </EmptyState>
             );
         }
+        if (visible.length === 0 && isComputing) {
+            return (
+                <div className="loading" role="status">
+                    <span className="spinner" aria-hidden="true"/>
+                    <span>
+                        Finding the best baskets…
+                        <span className="loading__note">Large wishlists with big budgets can take a few seconds.</span>
+                    </span>
+                </div>
+            );
+        }
         if (visible.length === 0 && !isComputing) {
             return (
                 <EmptyState title="Nothing affordable at this budget">

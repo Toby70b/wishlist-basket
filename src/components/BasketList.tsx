@@ -13,7 +13,11 @@ export function BasketList({ baskets, budget, isComputing }: Props) {
       <header className="results__head">
         <h2 id="results-title">Best baskets</h2>
         <span className={`recalc ${isComputing ? 'recalc--on' : ''}`} role="status">
-          {isComputing ? 'Recalculating…' : ''}
+          {isComputing && (
+            <>
+              <span className="spinner" aria-hidden="true" /> Recalculating…
+            </>
+          )}
         </span>
       </header>
       <ol className={`basket-list ${isComputing ? 'basket-list--stale' : ''}`}>
