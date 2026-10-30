@@ -1,3 +1,7 @@
+"""
+Lambda handler function. This function acts as a proxy for the Steam Wishlist API designed to be invoked from the
+Wishlist UI running on the same cloudfront distribution.
+"""
 import logging
 import json
 from urllib.parse import urlencode
@@ -14,10 +18,6 @@ logger = logging.getLogger()
 session = requests.Session()
 session.headers.update({"Accept": "application/json"})
 
-"""
-Lambda handler function. This function acts as a proxy for the Steam Wishlist API designed to be invoked from the
-Wishlist UI running on the same cloudfront distribution.
-"""
 
 def lambda_handler(event, context):
     """
@@ -52,6 +52,10 @@ def _handle(event):
         return api_response(504, {"error_message": "Steam Wishlist API timed out"})
     except requests.RequestException:
         return api_response(502, {"error_message": "Steam Wishlist API unavailable"})
+
+
+    if resp.status_code != 200:
+        logger.warning(f"non 200 response from Steam Wishlist API: {resp.status_code}")
 
     return api_response(
         resp.status_code,

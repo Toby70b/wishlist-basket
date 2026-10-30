@@ -16,6 +16,6 @@ class TestConfig:
         monkeypatch.setenv("STEAM_API_BASE_URL", "http://localhost:5000")
         assert load_config() == Config(base_url="http://localhost:5000")
 
-    def test_missing_config_raises_error(self, monkeypatch):
-        with pytest.raises(Exception):
+    def test_missing_config_raises_error(self):
+        with pytest.raises(KeyError, match="STEAM_API_BASE_URL"):
             load_config()
