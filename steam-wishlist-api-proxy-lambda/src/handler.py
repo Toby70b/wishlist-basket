@@ -64,7 +64,7 @@ def _handle(event):
     )
 
 
-def api_response(status: int, body: dict | str, headers: dict | None = None) -> dict:
+def _api_response(status: int, body: dict | str, headers: dict | None = None) -> dict:
     return {
         "statusCode": status,
         "headers": {"Content-Type": "application/json", **(headers or {})},
@@ -72,6 +72,6 @@ def api_response(status: int, body: dict | str, headers: dict | None = None) -> 
     }
 
 
-def build_outbound_url(query: InputJson, cfg: Config) -> str:
+def _build_outbound_url(query: InputJson, cfg: Config) -> str:
     input_json = query.model_dump_json(by_alias=True)
     return f"{cfg.base_url}{WISHLIST_API_PATH}?{urlencode({'input_json': input_json})}"
