@@ -35,7 +35,7 @@ def lambda_handler(event, context):
         return _handle(event)
     except Exception:
         logger.exception("Unhandled error, request_id=%s", getattr(context, "aws_request_id", None))
-        return api_response(500, {"error_message": "unexpected error occurred"})
+        return _api_response(500, {"error_message": "unexpected error occurred"})
 
 
 def _handle(event):
@@ -44,20 +44,20 @@ def _handle(event):
     try:
         query = InputJson.from_query_params(event.get("queryStringParameters"))
     except BadRequest as e:
-        return api_response(400, {"error_message": str(e)})
+        return _api_response(400, {"error_message": str(e)})
 
     try:
-        resp = session.get(build_outbound_url(query, cfg), timeout=TIMEOUT_SECONDS)
+        resp = session.get(_build_outbound_url(query, cfg), timeout=TIMEOUT_SECONDS)
     except requests.Timeout:
-        return api_response(504, {"error_message": "Steam Wishlist API timed out"})
+        return _api_response(504, {"error_message": "Steam Wishlist API timed out"})
     except requests.RequestException:
-        return api_response(502, {"error_message": "Steam Wishlist API unavailable"})
+        return _api_response(502, {"error_message": "Steam Wishlist API unavailable"})
 
 
     if resp.status_code != 200:
         logger.warning(f"non 200 response from Steam Wishlist API: {resp.status_code}")
 
-    return api_response(
+    return _api_response(
         resp.status_code,
         resp.text,
         {"Content-Type": resp.headers.get("Content-Type", "application/json")},
