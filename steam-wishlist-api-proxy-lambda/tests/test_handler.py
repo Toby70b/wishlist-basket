@@ -51,6 +51,14 @@ class TestHandler:
         # assert nothing sent downstream
         assert len(http.calls) == 0
 
+    def test_missing_env_var_returns_500(self, env, http, valid_query_params, lambda_context, monkeypatch):
+        monkeypatch.delenv("STEAM_API_BASE_URL")
+        result = lambda_handler(event(valid_query_params), lambda_context)
+
+        assert result["statusCode"] == 500
+        assert json.loads(result["body"])["error_message"] == "unexpected error occurred"
+        assert len(http.calls) == 0
+
     @pytest.mark.parametrize(
         "exception",
         [
@@ -97,8 +105,8 @@ class TestHandler:
             pytest.param(WISHLIST_DISCOUNTED_ITEM, 200, id="discounted item with £"),
             pytest.param(WISHLIST_COMING_SOON_ITEM, 200, id="coming soon, no price"),
             pytest.param(WISHLIST_EMPTY, 200, id="empty wishlist"),
-            pytest.param('{"error_message": "unexpected error occurred"', 500, id="empty wishlist"),
-            pytest.param('{"error_message": "invalid user"', 400, id="empty wishlist"),
+            pytest.param('{"error_message": "unexpected error occurred}"', 500, id="500 error"),
+            pytest.param('{"error_message": "invalid user}"', 400, id="400 error"),
         ],
     )
     def test_passes_steam_response_through_unmodified(self, http, lambda_context, valid_query_params, steam_body, status_code):

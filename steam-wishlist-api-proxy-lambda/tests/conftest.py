@@ -8,7 +8,7 @@ STEAM_WISHLIST_URL = f"{STEAM_BASE_URL}{WISHLIST_API_PATH}"
 
 @pytest.fixture
 def valid_payload() -> dict:
-    return {"steamid": "1234556777", "context": {"country_code": "GB"}, "page_size": 1000}
+    return {"steamid": "76561198000000001", "context": {"country_code": "GB"}, "page_size": 1000}
 
 @pytest.fixture
 def valid_query_params(valid_payload) -> dict:

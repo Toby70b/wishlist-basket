@@ -1,6 +1,6 @@
 import json
 
-VALID_PAYLOAD = {"steamid": "1234556777", "context": {"country_code": "GB"}, "page_size": 1000}
+VALID_PAYLOAD = {"steamid": "76561198000000001", "context": {"country_code": "GB"}, "page_size": 1000}
 VALID_QUERY_PARAMS = {"input_json": json.dumps(VALID_PAYLOAD)}
 
 WISHLIST_DISCOUNTED_ITEM = json.dumps({

@@ -34,7 +34,7 @@ def lambda_handler(event, context):
     try:
         return _handle(event)
     except Exception:
-        logger.exception("Unhandled error, request_id=%s", context.aws_request_id)
+        logger.exception("Unhandled error, request_id=%s", getattr(context, "aws_request_id", None))
         return api_response(500, {"error_message": "unexpected error occurred"})
 
 

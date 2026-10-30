@@ -17,9 +17,9 @@ class Context(ApiModel):
 
 class InputJson(ApiModel):
     """Inbound wishlist query params parsed from the `input_json` query param."""
-    steam_id: str = Field(alias="steamid")
+    steam_id: str = Field(alias="steamid", pattern=r"^\d{17}$")  # SteamID64
     context: Context
-    page_size: int
+    page_size: int = Field(ge=1, le=1000)  # Steam's maximum page size
 
     @classmethod
     def from_query_params(cls, params: dict | None) -> "InputJson":
