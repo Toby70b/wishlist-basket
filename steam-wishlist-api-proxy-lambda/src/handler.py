@@ -53,7 +53,11 @@ def _handle(event):
     except requests.RequestException:
         return api_response(502, {"error_message": "Steam Wishlist API unavailable"})
 
-    return api_response(resp.status_code, resp.text)
+    return api_response(
+        resp.status_code,
+        resp.text,
+        {"Content-Type": resp.headers.get("Content-Type", "application/json")},
+    )
 
 
 def api_response(status: int, body: dict | str, headers: dict | None = None) -> dict:

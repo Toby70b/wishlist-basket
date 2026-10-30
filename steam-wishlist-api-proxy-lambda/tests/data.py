@@ -58,4 +58,11 @@ WISHLIST_COMING_SOON_ITEM = json.dumps({
     }
 })
 
-WISHLIST_EMPTY = json.dumps({"response": {}})
+WISHLIST_EMPTY = json.dumps({"response": {}})
+
+STEAM_JSON = "application/json; charset=utf-8"
+STEAM_HTML = "text/html; charset=UTF-8"
+
+# Steam answers a bad steamid with an HTML error page, not JSON
+STEAM_BAD_REQUEST_HTML = "<html><head><title>Bad Request</title></head><body><h1>Bad Request</h1></body></html>"
+STEAM_TOO_MANY_REQUESTS_HTML = "<html><head><title>Too Many Requests</title></head><body><h1>Too Many Requests</h1></body></html>"
