@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 /.claude/
+
+# Python
+.venv/
+__pycache__/
+build/
