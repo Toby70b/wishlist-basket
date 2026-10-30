@@ -95,8 +95,10 @@ class TestHandler:
         request = http.calls[0].request
 
         assert urlparse(request.url).path == urlparse(STEAM_WISHLIST_URL).path
-        params = parse_qs(urlparse(request.url).query)
-        assert json.loads(params["input_json"][0]) == VALID_PAYLOAD
+        query = parse_qs(urlparse(request.url).query, strict_parsing=True)
+        decoded = {name: json.loads(value) for name, [value] in query.items()}
+
+        assert decoded == {"input_json": VALID_PAYLOAD}
         assert request.headers["Accept"] == "application/json"
 
     @pytest.mark.parametrize(
