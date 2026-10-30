@@ -12,6 +12,7 @@ class ApiModel(BaseModel):
 
 
 class Context(ApiModel):
+    language: str
     country_code: str
 
 

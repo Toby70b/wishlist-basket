@@ -38,7 +38,7 @@ class TestHandler:
         [
             pytest.param(None, "missing 'input_json' query param", id="no params"),
             pytest.param({"input_json": "not json"}, "Invalid JSON", id="malformed json"),
-            pytest.param({"input_json": '{"context":{"country_code":"GB"},"page_size":1000}'},
+            pytest.param({"input_json": '{"context":{"language":"english","country_code":"GB"},"page_size":1000}'},
                          "steamid: Field required", id="missing field"),
         ],
     )

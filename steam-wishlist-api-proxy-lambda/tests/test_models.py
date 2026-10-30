@@ -18,6 +18,7 @@ class TestInputJson:
 
         assert input_json.steam_id == "76561198000000001"
         assert input_json.context is not None
+        assert input_json.context.language == "english"
         assert input_json.context.country_code == "GB"
         assert input_json.page_size == 1000
 
@@ -38,16 +39,19 @@ class TestInputJson:
     @pytest.mark.parametrize(
         "invalid_query_param, expected_message",
         [
-            pytest.param({"input_json": '{"context":{"country_code":"GB"},"page_size":1000}'},
+            pytest.param({"input_json": '{"context":{"language":"english","country_code":"GB"},"page_size":1000}'},
                          "steamid: Field required",
                          id="missing steamid"),
             pytest.param({"input_json": '{"steamid":"76561198000000001","page_size":1000}'},
                          "context: Field required",
                          id="missing context"),
-            pytest.param({"input_json": '{"steamid":"76561198000000001","context":{},"page_size":1000}'},
+            pytest.param({"input_json": '{"steamid":"76561198000000001","context":{"country_code":"GB"},"page_size":1000}'},
+                         "context.language: Field required",
+                         id="missing language"),
+            pytest.param({"input_json": '{"steamid":"76561198000000001","context":{"language":"english"},"page_size":1000}'},
                          "context.country_code: Field required",
                          id="missing country_code"),
-            pytest.param({"input_json": '{"steamid":"76561198000000001", "context":{"country_code":"GB"}}'},
+            pytest.param({"input_json": '{"steamid":"76561198000000001", "context":{"language":"english","country_code":"GB"}}'},
                          "page_size: Field required",
                          id="missing page_size"),
         ],
