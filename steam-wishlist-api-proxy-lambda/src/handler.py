@@ -19,7 +19,6 @@ Lambda handler function. This function acts as a proxy for the Steam Wishlist AP
 Wishlist UI running on the same cloudfront distribution.
 """
 
-
 def lambda_handler(event, context):
     """
     The handler receives a HTTP GET request for the Steam Wishlist API, it then forwards the request onto the real
