@@ -1,13 +1,40 @@
 # --- Lambda --- #
-data "archive_file" "game_capsule_image_lookup" {
-  type        = "zip"
-  source_dir  = "${path.module}/../lambdas/capsule_image_lookup/"
-  output_path = "${path.module}/files/capsule_image_lookup.zip"
-  excludes    = ["requirements.txt"]
+locals {
+  lambda_zip    = "${path.module}/../steam-wishlist-api-proxy-lambda/dist/lambda.zip"
+  function_name = "wishlist-basket-api-proxy"
+}
+resource "aws_lambda_function" "api_proxy" {
+  filename         = local.lambda_zip
+  source_code_hash = filebase64sha256(local.lambda_zip)
+
+  function_name                  = local.function_name
+  role                           = aws_iam_role.api_proxy.arn
+  handler                        = "handler.lambda_handler"
+  runtime                        = "python3.12"
+  timeout                        = 10
+  memory_size                    = 256
+  reserved_concurrent_executions = 10
+
+  environment {
+    variables = {
+      STEAM_API_BASE_URL = var.steam_wishlist_api_base_url
+    }
+  }
+
+  logging_config {
+    log_format = "Text"
+    log_group  = aws_cloudwatch_log_group.api_proxy.name
+  }
 }
 
-resource "aws_iam_role" "game_capsule_image_lookup_lambda_role" {
-  name = "game-capsule_image-lookup-lambda-role"
+resource "aws_lambda_function_url" "api_proxy" {
+  function_name = aws_lambda_function.api_proxy.function_name
+  # only CloudFront, signing via the OAC, can call it
+  authorization_type = "AWS_IAM"
+}
+
+resource "aws_iam_role" "api_proxy" {
+  name = "${local.function_name}-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -19,65 +46,21 @@ resource "aws_iam_role" "game_capsule_image_lookup_lambda_role" {
   })
 }
 
-resource "aws_iam_role_policy" "game_capsule_image_lookup_lambda_policy" {
-  name = "ddb-export-lambda-policy"
-  role = aws_iam_role.game_capsule_image_lookup_lambda_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:PutObject"]
-        Resource = "${aws_s3_bucket.website.arn}/*"
-      },
-      {
-        Effect   = "Allow"
-        Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
-        Resource = aws_sqs_queue.game_capsule_image_lookup.arn
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Resource = "arn:aws:logs:*:*:*"
-      }
-    ]
-  })
+resource "aws_iam_role_policy_attachment" "api_proxy_logs" {
+  role       = aws_iam_role.api_proxy.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_lambda_function" "game_capsule_image_lookup" {
-  filename         = data.archive_file.game_capsule_image_lookup.output_path
-  source_code_hash = data.archive_file.game_capsule_image_lookup.output_base64sha256
+resource "aws_cloudwatch_log_group" "api_proxy" {
+  name              = "/aws/lambda/${local.function_name}"
+  retention_in_days = 14
+}
 
-  function_name = "game-capsule-image-lookup"
-  role          = aws_iam_role.game_capsule_image_lookup_lambda_role.arn
-  handler       = "capsule_image_lookup.handler"
-  runtime       = "python3.12"
-  timeout       = 60
-  memory_size   = 128
-
-  environment {
-    variables = {
-      BUCKET_NAME          = aws_s3_bucket.website.bucket
-      STEAM_STORE_BASE_URL = var.steam_store_base_url
+resource "terraform_data" "require_lambda_build" {
+  lifecycle {
+    precondition {
+      condition     = fileexists(local.lambda_zip)
+      error_message = "No Lambda build at ${local.lambda_zip}. Run steam-wishlist-api-proxy-lambda/build.sh first."
     }
-  }
-}
-
-resource "aws_lambda_event_source_mapping" "new_game_item_stream" {
-  event_source_arn = aws_sqs_queue.game_capsule_image_lookup.arn
-  function_name    = aws_lambda_function.game_capsule_image_lookup.arn
-
-  # Batch settings -  need to consider initial setup scenario
-  batch_size                         = 10
-  maximum_batching_window_in_seconds = 10
-  function_response_types            = ["ReportBatchItemFailures"]
-
-  scaling_config {
-    maximum_concurrency = 5
   }
 }

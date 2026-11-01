@@ -28,6 +28,8 @@ dist-ssr
 .venv/
 __pycache__/
 build/
+# Build packages (e.g. the Lambda zip)
+*.zip
 
 # Terraform
 **/.terraform/*
