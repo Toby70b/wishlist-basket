@@ -128,7 +128,7 @@ resource "aws_lambda_permission" "cloudfront_invoke_function_url" {
 }
 
 resource "aws_lambda_permission" "cloudfront_invoke_function" {
-  statement_id  = "InvokeFunction"
+  statement_id  = "AllowCloudFrontInvokeFunction"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.api_proxy.function_name
   principal     = "cloudfront.amazonaws.com"

@@ -60,7 +60,7 @@ resource "terraform_data" "require_lambda_build" {
   lifecycle {
     precondition {
       condition     = fileexists(local.lambda_zip)
-      error_message = "No Lambda build at ${local.lambda_zip}. Run steam-wishlist-api-proxy-lambda/build.sh first."
+      error_message = "No Lambda build at ${local.lambda_zip}. Run `npm run deploy`, or steam-wishlist-api-proxy-lambda/build.py."
     }
   }
 }
