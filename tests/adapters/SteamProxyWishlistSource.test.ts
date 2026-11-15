@@ -47,7 +47,7 @@ describe('SteamProxyWishlistSource', () => {
             expect([...url.searchParams.keys()]).toEqual(['input_json']);
         });
 
-        it('sends the steam ID as "steamid" (lower case), with country_code GB, language english and page_size 1000', async () =>{
+        it('sends the steam ID as "steamid" (lower case), with country_code GB, language english and page_size 1000', async () => {
             fetchMock.mockImplementation(steamResponse(steamWishlist(steamItem({name: 'First', price: 200}))));
 
             await source.getWishlist(STEAM_ID);
@@ -65,7 +65,7 @@ describe('SteamProxyWishlistSource', () => {
         })
 
         it('encodes input_json exactly once (decoding the URL gives back valid JSON)', async () => {
-            fetchMock.mockImplementation(steamResponse(steamWishlist(steamItem({ name: 'First', price: 200 }))));
+            fetchMock.mockImplementation(steamResponse(steamWishlist(steamItem({name: 'First', price: 200}))));
 
             await source.getWishlist(STEAM_ID);
 
@@ -74,6 +74,7 @@ describe('SteamProxyWishlistSource', () => {
             const inputJson = url.searchParams.get('input_json');
 
             expect(() => JSON.parse(inputJson!)).not.toThrow();
+            expect(requested).not.toMatch(/[{}"]/);
         });
 
         it('uses the base URL it was given, e.g. a different proxy path', async () => {
@@ -165,7 +166,7 @@ describe('SteamProxyWishlistSource', () => {
 
             const games = await source.getWishlist(STEAM_ID);
             expect(games[0].isBestPurchaseOptionAsPartOfBundle).toEqual(true);
-        })
+        });
 
         it('does not flag a single-game package price as part of a bundle', async () => {
             fetchMock.mockImplementation(steamResponse(steamWishlist(
@@ -174,7 +175,7 @@ describe('SteamProxyWishlistSource', () => {
 
             const games = await source.getWishlist(STEAM_ID);
             expect(games[0].isBestPurchaseOptionAsPartOfBundle).toEqual(false);
-        })
+        });
 
         it('uses store_item.name as the game name', async () => {
             fetchMock.mockImplementation(steamResponse(steamWishlist(
@@ -190,7 +191,7 @@ describe('SteamProxyWishlistSource', () => {
             );
         });
 
-        it('maps a game with no store_item to an "Unknown game" placeholder with no price, and warns', async () => {
+        it('maps a game with no store_item to an "Unknown game" placeholder with no price', async () => {
             fetchMock.mockImplementation(steamResponse(steamWishlist(
                 steamItem({noStoreItem: true}),
             )));
@@ -314,7 +315,7 @@ describe('SteamProxyWishlistSource', () => {
                 type: 'unavailable',
                 message: "failed to fetch wishlist from Steam API"
             });
-        })
+        });
 
         it('turns a network failure (fetch rejects) into WishlistError unavailable', async () => {
             fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
