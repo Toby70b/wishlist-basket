@@ -47,8 +47,34 @@ describe('SteamProxyWishlistSource', () => {
             expect([...url.searchParams.keys()]).toEqual(['input_json']);
         });
 
-        it.todo('sends the steam ID as "steamid" (lower case), with country_code GB, language english and page_size 1000');
-        it.todo('encodes input_json exactly once (decoding the URL gives back valid JSON)');
+        it('sends the steam ID as "steamid" (lower case), with country_code GB, language english and page_size 1000', async () =>{
+            fetchMock.mockImplementation(steamResponse(steamWishlist(steamItem({name: 'First', price: 200}))));
+
+            await source.getWishlist(STEAM_ID);
+
+            const requested = String(fetchMock.mock.calls[0][0]);
+            const url = new URL(requested, 'http://localhost');
+            const inputJson = url.searchParams.get('input_json');
+            const parsed = JSON.parse(inputJson!);
+
+            expect(parsed).toEqual({
+                steamid: STEAM_ID,
+                context: {language: 'english', country_code: 'GB'},
+                page_size: 1000
+            });
+        })
+
+        it('encodes input_json exactly once (decoding the URL gives back valid JSON)', async () => {
+            fetchMock.mockImplementation(steamResponse(steamWishlist(steamItem({ name: 'First', price: 200 }))));
+
+            await source.getWishlist(STEAM_ID);
+
+            const requested = String(fetchMock.mock.calls[0][0]);
+            const url = new URL(requested, 'http://localhost');
+            const inputJson = url.searchParams.get('input_json');
+
+            expect(() => JSON.parse(inputJson!)).not.toThrow();
+        });
 
         it('uses the base URL it was given, e.g. a different proxy path', async () => {
             const newSource = new SteamProxyWishlistSource('/thisIsABasePath', fetchMock);
@@ -63,8 +89,27 @@ describe('SteamProxyWishlistSource', () => {
     });
 
     describe('mapping each game', () => {
-        it.todo('maps a discounted game: price, originalPrice and discountPercent from best_purchase_option');
-        it.todo('maps a full-price game with no original_price_in_cents: originalPrice equals price, discount 0');
+        it('maps a discounted game: price, originalPrice and discountPercent from best_purchase_option', async () => {
+            fetchMock.mockImplementation(steamResponse(steamWishlist(
+                steamItem({appid: 123, originalPrice: 200, price: 100, discountPct: 50}),
+            )));
+
+            const games = await source.getWishlist(STEAM_ID);
+            expect(games.map((g) => [g.appId, g.originalPrice, g.price, g.discountPercent])).toEqual(
+                [[123, 200, 100, 50]]
+            );
+        });
+
+        it('maps a full-price game with no original_price_in_cents: originalPrice equals price, discount 0', async () => {
+            fetchMock.mockImplementation(steamResponse(steamWishlist(
+                steamItem({appid: 123, originalPrice: undefined, price: 200}),
+            )));
+
+            const games = await source.getWishlist(STEAM_ID);
+            expect(games.map((g) => [g.appId, g.originalPrice, g.price, g.discountPercent])).toEqual(
+                [[123, 200, 200, 0]]
+            );
+        });
 
         it('converts Steam\'s string prices to numbers in pence', async () => {
             fetchMock.mockImplementation(steamResponse(steamWishlist(
@@ -113,8 +158,23 @@ describe('SteamProxyWishlistSource', () => {
             expect(games[0].name).toEqual('First')
         });
 
-        it.todo('flags a bundle price (best_purchase_option has bundleid) as isBestPurchaseOptionAsPartOfBundle');
-        it.todo('does not flag a single-game package price (best_purchase_option has packageid)');
+        it('flags a bundle price (best_purchase_option has bundleid) as isBestPurchaseOptionAsPartOfBundle', async () => {
+            fetchMock.mockImplementation(steamResponse(steamWishlist(
+                steamItem({name: 'First', bundle: true}),
+            )));
+
+            const games = await source.getWishlist(STEAM_ID);
+            expect(games[0].isBestPurchaseOptionAsPartOfBundle).toEqual(true);
+        })
+
+        it('does not flag a single-game package price as part of a bundle', async () => {
+            fetchMock.mockImplementation(steamResponse(steamWishlist(
+                steamItem({name: 'First', bundle: false}),
+            )));
+
+            const games = await source.getWishlist(STEAM_ID);
+            expect(games[0].isBestPurchaseOptionAsPartOfBundle).toEqual(false);
+        })
 
         it('uses store_item.name as the game name', async () => {
             fetchMock.mockImplementation(steamResponse(steamWishlist(
@@ -129,7 +189,25 @@ describe('SteamProxyWishlistSource', () => {
                 [['First'], ['Second'], ['Third'], ['Fourth']]
             );
         });
-        it.todo('maps a game with no store_item to an "Unknown game" placeholder with no price, and warns');
+
+        it('maps a game with no store_item to an "Unknown game" placeholder with no price, and warns', async () => {
+            fetchMock.mockImplementation(steamResponse(steamWishlist(
+                steamItem({noStoreItem: true}),
+            )));
+
+            const games = await source.getWishlist(STEAM_ID);
+            expect(games[0]).toMatchObject({
+                appId: expect.any(Number),
+                name: expect.stringMatching(/^Unknown game \(app \d+\)$/),
+                price: null,
+                originalPrice: null,
+                discountPercent: 0,
+                rank: expect.any(Number),
+                isFree: false,
+                isComingSoon: false,
+                isBestPurchaseOptionAsPartOfBundle: false,
+            });
+        });
     });
 
     describe('rank', () => {
