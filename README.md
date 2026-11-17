@@ -26,7 +26,6 @@ input validation and error handling in the Lambda, fixes to the Steam adapter, a
 **Written by me:** the domain logic (`Game`, `Basket`, scoring, `findBaskets`), `planBaskets`, the Steam adapter, the
 Lambda handler and models, the Terraform, and most of the tests.
 
-
 ## How it works
 
 1. **Fetch:** one request to Steam's `IWishlistService/GetWishlistSortedFiltered` returns the whole wishlist in your
@@ -73,6 +72,8 @@ The domain and application layers don't know about React or Steam, so they're te
 | `scripts/` | The build check for mock data, and the deploy script |
 
 ## Running locally
+
+Requires Node 22.12+
 
 ```bash
 npm install
@@ -152,9 +153,9 @@ waits for you to confirm. Terraform uploads the built site to S3 and the zip to 
 
 Before the first deploy:
 
-- Run `terraform init` in `terraform/` once. State is kept in S3 (`backend.tf`).
 - Terraform needs AWS credentials it can read. If you sign in with `aws login`, Terraform can't use that session
-  directly, so add a profile that hands it over and point Terraform at it:
+  directly, so add a profile that hands it over and point Terraform at it
+- Run `terraform init` in `terraform/` once. State is kept in S3 (`backend.tf`).
 
   ```ini
   # ~/.aws/config
