@@ -154,8 +154,7 @@ waits for you to confirm. Terraform uploads the built site to S3 and the zip to 
 Before the first deploy:
 
 - Terraform needs AWS credentials it can read. If you sign in with `aws login`, Terraform can't use that session
-  directly, so add a profile that hands it over and point Terraform at it
-- Run `terraform init` in `terraform/` once. State is kept in S3 (`backend.tf`).
+  directly, so add a profile that hands it over and point Terraform at it:
 
   ```ini
   # ~/.aws/config
@@ -167,6 +166,8 @@ Before the first deploy:
   ```powershell
   $env:AWS_PROFILE = "terraform"
   ```
+
+- Run `terraform init` in `terraform/` once, in that terminal. State is kept in S3 (`backend.tf`).
 
 Website files are cached for 5 minutes in CloudFront and in browsers, so a deploy reaches everyone within about 10
 minutes. The `/api/*` route is never cached.
