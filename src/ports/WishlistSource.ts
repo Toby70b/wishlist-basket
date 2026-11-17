@@ -14,13 +14,13 @@ export interface WishlistSource {
 
 export type WishlistErrorType = 'private' | 'invalid-id' | 'unavailable';
 
-/** The UI reads `kind` to choose its error message. */
+/** The UI reads `type` to choose its error message. */
 export class WishlistError extends Error {
   readonly type: WishlistErrorType;
 
-  constructor(kind: WishlistErrorType, message: string) {
+  constructor(type: WishlistErrorType, message: string) {
     super(message);
     this.name = 'WishlistError';
-    this.type = kind;
+    this.type = type;
   }
 }

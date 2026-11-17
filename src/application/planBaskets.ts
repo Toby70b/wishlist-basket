@@ -13,7 +13,6 @@ export type BasketPlan = {
 /**
  * Everything the results page needs from a wishlist. Pure: no React, no I/O.
  * `games` is the whole wishlist, unfiltered (free and coming-soon games included).
- *
  */
 export function planBaskets(games: readonly Game[], budget: number): BasketPlan {
     // N for scoring is the whole wishlist, so points don't shift with the budget.

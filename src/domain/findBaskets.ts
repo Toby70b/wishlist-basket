@@ -10,8 +10,8 @@ import type {ScoredGame} from "./scoring.ts";
  * - Build baskets game by game. Adding a game to an existing basket makes a new basket;
  *   originals never change.
  * - Keep at most 20 baskets per total (per penny); drop the lowest scoring.
- * - Games are scored before they go into baskets, with a ScoringPolicy from scoring.ts
- *   (RankScoring); a basket's score is the sum.
+ * - Games are scored before they go into baskets, with a ScoringPolicy from scoring.ts;
+ *   a basket's score is the sum.
  * - Return every kept basket sorted by score, best first. The caller takes the top N.
  */
 
@@ -45,7 +45,7 @@ function addNewBasketToBasketMap(newBasket: Basket, budget: number, potentialBas
     if (newBasket.totalCost <= budget) {
         let countForTotal = potentialBaskets.get(newBasket.totalCost)?.length ?? 0;
         if (countForTotal >= MAX_BASKETS_PER_TOTAL) {
-            // If we already have MAX_BASKETS_PER_TOTAL  baskets for this total, check if the new basket has a higher score than the lowest scoring basket
+            // This total is full: keep the new basket only if it beats the lowest scorer
             let existingBaskets = potentialBaskets.get(newBasket.totalCost) ?? [];
             let lowestScoringBasket = existingBaskets.sort((b1, b2) => b1.score - b2.score)[0];
             if (newBasket.score > lowestScoringBasket.score) {

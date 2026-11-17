@@ -9,7 +9,7 @@ export type Game = {
   rank: number; // wishlist position, 1 = top
   isFree: boolean; // free to play (Steam's is_free). Needed because these have no price
   isComingSoon: boolean; // not released yet; has a price only if it can be pre-ordered
-  isBestPurchaseOptionAsPartOfBundle: boolean; // true if the best purchase option is part of a bundle, false if not
+  isBestPurchaseOptionAsPartOfBundle: boolean; // cheapest when bought as part of a multi-game bundle
 };
 
 /** Steam will sell it to you: paid, discounted, 100% off, or pre-order. */

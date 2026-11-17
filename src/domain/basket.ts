@@ -2,7 +2,7 @@ import type { Game } from './game';
 import type { ScoredGame } from './scoring';
 
 /**
- * A basket of games. The invariant is that `total` and `score` always reflect
+ * A basket of games. The invariant is that `totalCost` and `score` always reflect
  * `scoredGames` exactly, so the only way to get a Basket is from already-scored games.
  */
 export class Basket {
