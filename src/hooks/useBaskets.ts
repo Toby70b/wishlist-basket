@@ -19,9 +19,6 @@ const NOTHING_COMPUTED: Computed = { plan: planBaskets(NO_GAMES, 0), games: NO_G
  * the browser can't repaint while it runs. So the work is deferred until after the next
  * paint: isComputing turns true straight away (so a spinner can be drawn), then the plan is
  * computed. Until it's ready the previous plan is still returned, so results never flash empty.
- *
- * TODO(post-MVP): make findBaskets faster, or move it to a Web Worker so the page stays
- * responsive while it runs.
  */
 export function useBaskets(games: Game[] | undefined, budget: number): UseBasketsResult {
   const list = games ?? NO_GAMES;

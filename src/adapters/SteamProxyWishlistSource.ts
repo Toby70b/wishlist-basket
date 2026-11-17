@@ -86,7 +86,7 @@ export class SteamProxyWishlistSource implements WishlistSource {
             name: item.store_item.name,
             // Steam's price is in the smallest currency unit (defined by country code so GB = pence)
             price: price,
-            // Steam game might not be on sale, so original price might be null. If it is on sale, then original price is the price before discount.
+            // Steam only sends original_price_in_cents when discounted; otherwise it's the same as price.
             originalPrice: bestPurchaseOption ? Number(bestPurchaseOption.original_price_in_cents ?? price): null,
             discountPercent: bestPurchaseOption ? bestPurchaseOption.discount_pct ?? 0 : 0,
             rank: this.calculateGameRankFromSteamResponse(index),
@@ -97,27 +97,18 @@ export class SteamProxyWishlistSource implements WishlistSource {
     }
 
     /**
-     * Calculates the rank of a game from the Steam API response.
-     * <br/>
-     * Each item has a priority, however, if the user has not ordered the game in their wishlist manually,
-     * then Steam will return a priority of 0. Steam does however return the games in the order of the user's wishlist,
-     * so we can fall back to the index in this case then add 1 to it to get the rank (1-based).
-     *
-     * @param index the index of the game in the response
-     * @returns the rank of the game
+     * Rank is the game's position in Steam's response (1-based). Steam returns the wishlist in the user's order;
+     * its `priority` field has gaps and 0s for games the user never ordered, so it isn't used.
      */
     private calculateGameRankFromSteamResponse(index: number): number {
         return index + 1;
     }
 
     /**
-     * Determines if a store item is part of a bundle. If the best purchase option is a bundle then steam will return a
-     * bundleid in the best_purchase_option object.
-     * @param store_item the store item from the Steam API response
-     * @returns true if the store item is part of a bundle, false otherwise
+     * True when Steam's cheapest purchase option is a bundle: it then sends `bundleid` instead of `packageid`.
      */
-    private isBestPurchaseOptionAsPartOfBundle(store_item: any) {
-        return store_item?.best_purchase_option?.bundleid !== undefined;
+    private isBestPurchaseOptionAsPartOfBundle(storeItem: any) {
+        return storeItem?.best_purchase_option?.bundleid !== undefined;
     }
 }
 

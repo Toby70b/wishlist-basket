@@ -1,4 +1,4 @@
-"""Inbound request models for the pass-through adapter."""
+"""Request models for the wishlist proxy."""
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 
@@ -8,6 +8,7 @@ class BadRequest(Exception):
 
 class ApiModel(BaseModel):
     """Shared config for all Pydantic API models."""
+    # Unknown fields are dropped, not forwarded: a new request field from the app must be added here to reach Steam.
     model_config = ConfigDict(extra="ignore", populate_by_name=True, frozen=True)
 
 
@@ -17,7 +18,7 @@ class Context(ApiModel):
 
 
 class InputJson(ApiModel):
-    """Inbound wishlist query params parsed from the `input_json` query param."""
+    """The wishlist request, parsed from the `input_json` query parameter."""
     steam_id: str = Field(alias="steamid", pattern=r"^\d{17}$")  # SteamID64
     context: Context
     page_size: int = Field(ge=1, le=1000)  # Steam's maximum page size
